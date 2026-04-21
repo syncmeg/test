@@ -828,7 +828,7 @@ const LogQueue = {
         userEmail = Session.getEffectiveUser().getEmail();
       } catch (e) {
         // If we don't have permission to get user email, use a fallback
-        console.log(\"Using fallback user identifier: \" + e.toString());
+        console.log("Using fallback user identifier: " + e.toString());
         userEmail = 'system';
       }
       
