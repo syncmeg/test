@@ -1,0 +1,4154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Contracts Dashboard - PSA Sorsogon</title>
+    <link 
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" 
+      rel="stylesheet" 
+      integrity="sha384-HtMZLkYo+pR5/u7zCzXxMJP6QoNnQJt1qkHM0EaOPvGDIzaVZbmYr/TlvUZ/sKAg" 
+      crossorigin="anonymous"
+    >
+
+    <link 
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+      rel="stylesheet" 
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+      crossorigin="anonymous" 
+      referrerpolicy="no-referrer"
+    >
+
+    <script 
+      src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" 
+      integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" 
+      crossorigin="anonymous"
+    ></script>
+    <style>
+        .hidden { display: none; }
+        .modal-overlay { 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 5;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        select[name="position"] { min-width: 0; text-overflow: ellipsis; }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.4);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.6);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6);
+        }
+        .input-modern {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .input-modern:focus {
+            border-color: #032B44;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(3, 43, 68, 0.1);
+            transform: translateY(-1px);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        .badge-success {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            color: white;
+        }
+        .badge-warning {
+            background: linear-gradient(135deg, #92400e 0%, #78350f 100%);
+            color: white;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        }
+        .gradient-bg-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .table-modern {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            font-size: 0.75rem;
+        }
+        .table-modern th {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            letter-spacing: 0.05em;
+        }
+        .table-modern td {
+            font-size: 0.75rem;
+            padding: 0.5rem 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .table-modern tr:hover {
+            background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%);
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+        /* ===== MICRO-INTERACTIONS ===== */
+        /* SMOOTH TRANSITIONS - 300-400ms easing */
+        .transition-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .transition-smooth-fast {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .transition-smooth-slow {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* BUTTON PRESS FEEDBACK - Shrink on active */
+        button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        button:active:not(:disabled) {
+            filter: brightness(0.95);
+        }
+        .btn-primary:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(30, 58, 138, 0.3);
+        }
+        .btn-secondary:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+        /* LOADING SKELETONS - Sophisticated shimmer animation */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+            border-radius: 0.5rem;
+        }
+        .skeleton-text {
+            height: 1rem;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        .skeleton-text-short {
+            height: 1rem;
+            width: 60%;
+        }
+        .skeleton-card {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            background: white;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .skeleton-table-row {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .skeleton-table-cell {
+            height: 1.5rem;
+            flex: 1;
+            border-radius: 0.5rem;
+        }
+        .skeleton-table-cell:first-child {
+            flex: 0 0 10%;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        /* TOAST NOTIFICATIONS - Enhanced styling */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-width: 300px;
+            max-width: 500px;
+        }
+        .toast.exit {
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .toast-success {
+            /* Slightly darkened the green to ensure 4.5:1 ratio */
+            background: linear-gradient(135deg, rgba(6, 95, 70, 0.98) 0%, rgba(4, 120, 87, 0.98) 100%);
+            color: white;
+            border: 1px solid rgba(16, 185, 129, 0.5);
+        }
+        .toast-error {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.95) 0%, rgba(220, 38, 38, 0.95) 100%);
+            color: white;
+            border: 1px solid rgba(248, 113, 113, 0.5);
+        }
+        .toast-info {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.95) 0%, rgba(37, 99, 235, 0.95) 100%);
+            color: white;
+            border: 1px solid rgba(96, 165, 250, 0.5);
+        }
+        .toast-warning {
+            background: linear-gradient(135deg, rgba(254, 243, 199, 0.98) 0%, rgba(251, 191, 36, 0.98) 100%);
+            /* Darker text color provides much better contrast on yellow/orange */
+            color: #78350f; 
+            border: 1px solid rgba(245, 158, 11, 0.5);
+        }
+        .toast-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        .toast-message {
+            flex: 1;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .toast-close {
+            flex-shrink: 0;
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+            padding: 0;
+            margin-left: 0.5rem;
+        }
+        .toast-close:hover {
+            opacity: 1;
+        }
+        /* Multiple Toast Stacking */
+        .toast:nth-of-type(1) { top: 1rem; }
+        .toast:nth-of-type(2) { top: calc(1rem + 80px); }
+        .toast:nth-of-type(3) { top: calc(1rem + 160px); }
+        .toast:nth-of-type(4) { top: calc(1rem + 240px); }
+        /* Loading Indicator - Smooth spinner */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            display: inline-block;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .spinner-sm {
+            width: 0.75rem;
+            height: 0.75rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-blue-50 to-navy-100 font-sans">
+
+
+    <div id="mainApp" class="max-w-7xl mx-auto mt-10 p-6">
+        <div class="glass-effect rounded-3xl shadow-xl p-8 card-hover">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
+                <div class="text-center lg:text-left">
+                    <div class="flex items-center gap-4 mb-2">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-700 to-blue-900 rounded-xl flex items-center justify-center shadow-lg">
+                            <i class="fas fa-chart-line text-white text-xl"></i>
+                        </div>
+                        <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent">Service Contracts Dashboard</h1>
+                    </div>
+                    <p id="titleSubtext" class="text-sm text-gray-600 font-medium flex items-center gap-2">
+                        <span>This is where PSA Sorsogon manage every Service Contract of personnel.</span>
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                    <button onclick="loadFormDataAndOpenModal()" class="btn-primary text-white px-6 py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all" aria-label="Add new record" type="button">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Add New Record</span>
+                    </button>
+                    <button onclick="loadTableDataTest()" class="glass-effect border border-white/20 hover:bg-white/90 hover:text-blue-700 hover:border-blue-300 hover:shadow-lg hover:scale-105 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2" aria-label="View all records" type="button">
+                        <i class="fas fa-database"></i>
+                        <span>View All Records</span>
+                    </button>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 pt-6">
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg">
+                            <i class="fas fa-calendar-alt text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold bg-gradient-to-r from-indigo-700 to-indigo-900 bg-clip-text text-transparent">Date Range Filter</h3>
+                            <p id="dateRangeInfo" class="text-sm text-gray-600">Showing all records. Select a date range to filter dashboard statistics.</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+                        <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-200">
+                            <i class="fas fa-calendar-day text-gray-600 text-sm"></i>
+                            <input type="date" id="dateFrom" placeholder="From" class="text-sm outline-none bg-transparent" onchange="handleDateChange()" aria-label="Date from filter">
+                        </div>
+                        <div class="flex items-center gap-2 bg-white rounded-lg px-3 py-2 shadow-sm border border-gray-200">
+                            <i class="fas fa-calendar-check text-gray-600 text-sm"></i>
+                            <input type="date" id="dateTo" placeholder="To" class="text-sm outline-none bg-transparent" onchange="handleDateChange()" aria-label="Date to filter">
+                        </div>
+                        <button onclick="resetDateRangeFilter()" class="glass-effect border border-white/20 hover:bg-white/90 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 text-sm" aria-label="Reset date range filter" type="button">
+                            <i class="fas fa-undo"></i>
+                            <span>Reset</span>
+                        </button>
+                        <button onclick="exportReport('excel')" class="btn-secondary text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all text-sm" aria-label="Export to spreadsheet" type="button">
+                            <i class="fas fa-file-excel"></i>
+                            <span>Export to Spreadsheet</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="msg" class="mt-6 text-center font-medium p-4 rounded-xl glass-effect hidden animate-pulse-slow"></div>
+
+        <div id="dashboardCards" class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div class="glass-effect rounded-2xl shadow-xl p-6 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-project-diagram text-white text-xl"></i>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600 font-medium">Total Projects</p>
+                        <p id="projectsCount" class="text-3xl font-bold text-blue-700">-</p>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-chart-line mr-2"></i>
+                    <span>Active service contracts</span>
+                </div>
+            </div>
+            <div class="glass-effect rounded-2xl shadow-xl p-6 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-600 to-green-800 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-users text-white text-xl"></i>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600 font-medium">Total Personnel</p>
+                        <p id="personnelCount" class="text-3xl font-bold text-green-700">-</p>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-user-tie mr-2"></i>
+                    <span>Staff members</span>
+                </div>
+            </div>
+            <div class="glass-effect rounded-2xl shadow-xl p-6 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-clock text-white text-xl"></i>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600 font-medium">Recent Activity</p>
+                        <p id="recentActivityCount" class="text-3xl font-bold text-purple-700">-</p>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-calendar-day mr-2"></i>
+                    <span>Last 7 days</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <dialog id="formModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" aria-modal="true" aria-labelledby="formModalTitle" style="background: transparent;">
+        <button class="modal-overlay" onclick="closeModal('formModal')" aria-label="Close modal" type="button"></button>
+        <div class="glass-effect rounded-3xl shadow-2xl z-10 w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col card-hover relative">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-blue-50 to-slate-100">
+              <div class="flex flex-col md:flex-row md:items-center gap-4 flex-grow">
+                  <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 bg-gradient-to-br from-blue-700 to-blue-900 rounded-xl flex items-center justify-center shadow-lg">
+                          <i class="fas fa-user-plus text-white"></i>
+                      </div>
+                      <h3 id="formModalTitle" class="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent">Create New Entries</h3>
+                  </div>
+              </div>
+              <button onclick="closeModal('formModal')" class="text-gray-600 hover:text-red-500 text-2xl ml-4 transition-colors hover:rotate-90 transform duration-300" aria-label="Close form modal" type="button">
+                  <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto custom-scrollbar">
+                <div id="formLoadingIndicator" class="hidden text-center py-12">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-700 to-blue-900 rounded-full mb-4 shadow-lg animate-pulse-slow">
+                        <i class="fas fa-spinner fa-spin text-white text-2xl"></i>
+                    </div>
+                    <h4 class="text-lg font-semibold text-gray-700 mb-2">Loading Form Data</h4>
+                    <p class="text-sm text-gray-600">Please wait while we prepare the form...</p>
+                </div>
+                
+                <div id="formContent" class="space-y-6">
+                    <div>
+                        <label for="projNameInput" class="block text-sm font-bold text-blue-700 uppercase mb-2 flex items-center gap-2">
+                            <i class="fas fa-project-diagram"></i>
+                            Project Name <span id="projectHelp" class="text-xs font-normal text-gray-600">(e.g. 2026 FIES V1, 2026 1st Quarter Fisheries, etc) - must include YEAR/MONTH/QUARTER</span>
+                        </label>
+                        <input list="projectList" name="projName" id="projNameInput" placeholder="Select or type..." class="w-full p-2 text-sm input-modern rounded-xl outline-none" aria-label="Project Name" aria-describedby="projectHelp">
+                        <datalist id="projectList">
+                            </datalist>
+                    </div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label for="trainingStartDate" class="block text-xs font-bold text-blue-700 uppercase mb-2 flex items-center gap-2">
+                                <i class="fas fa-calendar-alt"></i>
+                                Training Start (Optional)
+                            </label>
+                            <input type="date" name="trainingStartDate" id="trainingStartDate" class="w-full p-2 text-sm input-modern rounded-xl outline-none" aria-label="Training Start Date">
+                        </div>
+                        <div>
+                            <label for="trainingEndDate" class="block text-xs font-bold text-blue-700 uppercase mb-2 flex items-center gap-2">
+                                <i class="fas fa-calendar-check"></i>
+                                Training End (Optional)
+                            </label>
+                            <input type="date" name="trainingEndDate" id="trainingEndDate" class="w-full p-2 text-sm input-modern rounded-xl outline-none" aria-label="Training End Date">
+                        </div>
+                        <div>
+                            <label for="startDate" class="block text-xs font-bold text-blue-700 uppercase mb-2 flex items-center gap-2">
+                                <i class="fas fa-play-circle"></i>
+                                Contract Start
+                            </label>
+                            <input type="date" name="startDate" id="startDate" class="w-full p-2 text-sm input-modern rounded-xl outline-none" aria-label="Contract Start Date" required>
+                        </div>
+                        <div>
+                            <label for="endDate" class="block text-xs font-bold text-blue-700 uppercase mb-2 flex items-center gap-2">
+                                <i class="fas fa-stop-circle"></i>
+                                Contract End
+                            </label>
+                            <input type="date" name="endDate" id="endDate" class="w-full p-2 text-sm input-modern rounded-xl outline-none" aria-label="Contract End Date" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="entryContainer" class="overflow-auto custom-scrollbar p-4" style="max-height: 300px;">
+                  <table class="min-w-full table-modern" id="entryTable">
+                      <thead class="sticky top-0 z-20">
+                          <tr>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider min-w-[500px]">
+                                <i class="fas fa-users mr-1"></i>Name Details
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-24">
+                                <i class="fas fa-venus-mars mr-1"></i>Gender
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-48">
+                                <i class="fas fa-briefcase mr-1"></i>Position
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-32">
+                                <i class="fas fa-money-bill-wave mr-1"></i>Salary
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider flex-1">
+                                <i class="fas fa-envelope mr-1"></i>Email
+                            </th>
+                            <th class="px-4 py-4 text-center text-xs font-bold text-white uppercase tracking-wider w-12">
+                                <i class="fas fa-trash mr-1"></i>Action
+                            </th>
+                        </tr>
+                    </thead>
+                      <tbody id="entryRowsTest" class="divide-y divide-gray-100">
+                          </tbody>
+                  </table>
+              </div>
+                
+                <div id="bulkEntryControls" class="mt-6 flex flex-col sm:flex-row items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-slate-100 rounded-2xl border border-blue-100">
+                  <div class="flex items-center bg-white rounded-xl overflow-hidden shadow-md border border-blue-200">
+                      <span class="px-4 text-xs font-bold text-blue-600 bg-gradient-to-r from-blue-100 to-slate-200 border-r border-blue-200 flex items-center gap-2">
+                          <i class="fas fa-users"></i>
+                          QTY
+                      </span>
+                      <input type="number" id="rowCount" value="1" min="1" max="50" 
+                            class="w-20 p-2 text-xs outline-none focus:bg-blue-50 transition-colors font-semibold" aria-label="Number of personnel rows to add">
+                  </div>
+                  <button onclick="handleMultipleRows()" class="btn-secondary text-white text-xs font-semibold flex items-center gap-2 px-4 py-2 rounded-xl transition-all" aria-label="Add personnel rows" type="button">
+                      <i class="fas fa-user-plus"></i>
+                      <span>Add Personnel</span>
+                  </button>
+              </div>
+            </div>
+
+            <div class="p-6 border-t border-gray-200 bg-gradient-to-r from-blue-50 to-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-info-circle text-blue-600"></i>
+                <span id="formEntryInfo" class="text-sm text-gray-700 font-medium">Personnel entries ready</span>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="clearForm()" class="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-semibold rounded-xl flex items-center gap-2" aria-label="Clear form" type="button">
+                    <i class="fas fa-eraser"></i>
+                    Clear Form
+                </button>
+                <button onclick="submitAllEntries()" id="submitBtn" class="btn-primary text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2" aria-label="Save all records" type="button">
+                    <i class="fas fa-save"></i>
+                    <span>Save All Records</span>
+                </button>
+            </div>
+        </div>
+        </div>
+    </dialog>
+
+    <dialog id="tableModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" aria-modal="true" aria-labelledby="tableModalTitle" style="background: transparent;">
+        <button class="modal-overlay" onclick="closeModal('tableModal')" aria-label="Close modal" type="button"></button>
+        <div class="glass-effect rounded-2xl shadow-2xl z-10 w-full max-w-7xl h-[85vh] flex flex-col card-hover overflow-hidden relative">
+            <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-slate-100">
+              <div class="flex justify-between items-center mb-4">
+                  <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 bg-gradient-to-br from-blue-700 to-blue-900 rounded-xl flex items-center justify-center shadow-lg">
+                          <i class="fas fa-database text-white"></i>
+                      </div>
+                      <h3 id="tableModalTitle" class="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent">Database Records</h3>
+                  </div>
+                  <button onclick="closeModal('tableModal')" class="text-gray-600 hover:text-red-500 text-2xl transition-colors hover:rotate-90 transform duration-300" aria-label="Close table modal" type="button">
+                      <i class="fas fa-times"></i>
+                  </button>
+              </div>
+              <div class="flex gap-3 items-center">
+                  <div class="relative flex-1">
+                      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <i class="fas fa-search text-gray-600"></i>
+                      </div>
+                      <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Search records..." class="w-full pl-10 pr-10 py-2 input-modern rounded-lg outline-none" aria-label="Search records">
+                      <button type="button" onclick="clearTableSearch()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 hover:text-gray-800 transition-colors" aria-label="Clear search">
+                          <i class="fas fa-times-circle"></i>
+                      </button>
+                  </div>
+                  <button onclick="toggleAdvancedFilters()" class="glass-effect border border-white/20 hover:bg-white/90 text-purple-700 px-3 py-2 rounded-lg font-medium transition-all flex items-center gap-2 whitespace-nowrap" aria-label="Toggle advanced filters" type="button" aria-expanded="false" aria-controls="advancedFiltersSection">
+                      <i class="fas fa-filter text-sm"></i>
+                      <span class="text-sm">Filters</span>
+                      <i id="filterToggleIcon" class="fas fa-chevron-down text-xs"></i>
+                  </button>
+              </div>
+              <div id="advancedFiltersSection" class="hidden mt-2 p-2 bg-white rounded-lg border border-purple-200 max-h-32 overflow-y-auto">
+                  <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                          <div class="w-6 h-6 bg-gradient-to-br from-purple-600 to-purple-800 rounded flex items-center justify-center">
+                              <i class="fas fa-filter text-white text-xs"></i>
+                          </div>
+                          <h4 class="text-sm font-bold text-purple-700">Filters</h4>
+                      </div>
+                      <div class="flex gap-1">
+                          <button onclick="resetTableFilters()" class="glass-effect border border-white/20 hover:bg-white/90 text-gray-700 px-2 py-1 rounded text-xs font-medium transition-all flex items-center gap-1" aria-label="Reset table filters" type="button">
+                              <i class="fas fa-times-circle text-xs"></i>
+                              <span>Clear</span>
+                          </button>
+                      </div>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      <div>
+                          <label for="tableProjectFilter" class="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
+                              <i class="fas fa-project-diagram text-purple-600 text-xs"></i>
+                              Projects
+                          </label>
+                          <select id="tableProjectFilter" multiple class="w-full p-1 text-xs input-modern rounded outline-none" size="3" aria-label="Filter by projects">
+                              <!-- Options will be populated dynamically -->
+                          </select>
+                      </div>
+                      <div>
+                          <label for="tablePositionFilter" class="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
+                              <i class="fas fa-briefcase text-purple-600 text-xs"></i>
+                              Positions
+                          </label>
+                          <select id="tablePositionFilter" multiple class="w-full p-1 text-xs input-modern rounded outline-none" size="3" aria-label="Filter by positions">
+                              <!-- Options will be populated dynamically -->
+                          </select>
+                      </div>
+                      <div>
+                          <h4 class="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
+                              <i class="fas fa-info-circle text-purple-600 text-xs"></i>
+                              Status
+                          </h4>
+                          <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded p-2 border border-purple-200">
+                              <div class="text-xs space-y-1">
+                                  <div class="flex justify-between">
+                                      <span class="text-gray-600">Filters:</span>
+                                      <span id="tableFilterCount" class="font-bold text-purple-700">0</span>
+                                  </div>
+                                  <div class="flex justify-between">
+                                      <span class="text-gray-600">Results:</span>
+                                      <span id="tableFilterResults" class="font-bold text-purple-700">-</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+            
+<div class="overflow-auto custom-scrollbar flex-grow p-4">
+                <div id="tableProgress" class="text-sm text-blue-600 mb-4 p-3 bg-blue-50 rounded-xl border border-blue-200 hidden animate-pulse-slow">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>
+                    Loading records...
+                </div>
+                <table class="min-w-full table-modern" id="dataTable">
+                    <thead class="sticky top-0 z-20">
+                        <tr>
+                            <th class="px-4 py-4 text-center text-xs font-bold text-white uppercase tracking-wider w-20">
+                                <i class="fas fa-cog mr-1"></i>Action
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider" data-sort-key="rowId">
+                                <i class="fas fa-fingerprint mr-1"></i>Ref. Number
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider" data-sort-key="refNumber" style="display:none;">
+                                <i class="fas fa-barcode mr-1"></i>Ref. Number
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider min-w-[400px]" data-sort-key="name">
+                                <i class="fas fa-user mr-1"></i>Name
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider" data-sort-key="project">
+                                <i class="fas fa-project-diagram mr-1"></i>Project
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider" data-sort-key="gender">
+                                <i class="fas fa-venus-mars mr-1"></i>Gender
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider" data-sort-key="position">
+                                <i class="fas fa-briefcase mr-1"></i>Position
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider" data-sort-key="salary">
+                                <i class="fas fa-money-bill-wave mr-1"></i>Salary
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider min-w-[300px]" data-sort-key="email">
+                                <i class="fas fa-envelope mr-1"></i>Email
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider" data-sort-key="trainingDates">
+                                <i class="fas fa-graduation-cap mr-1"></i>Training
+                            </th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider" data-sort-key="duration">
+                                <i class="fas fa-calendar-alt mr-1"></i>Duration
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-100">
+                        </tbody>
+                </table>
+            </div>
+            <div class="p-6 border-t border-gray-200 bg-gradient-to-r from-blue-50 to-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-info-circle text-blue-600"></i>
+                <span id="pageInfo" class="text-sm text-gray-700 font-medium">Page 1 of 1</span>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="changePage(-1)" id="prevBtn" class="px-4 py-2 bg-white border border-blue-200 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-semibold text-blue-700 rounded-xl flex items-center gap-2" aria-label="Previous page" type="button">
+                    <i class="fas fa-chevron-left"></i>
+                    Previous
+                </button>
+                <button onclick="changePage(1)" id="nextBtn" class="px-4 py-2 bg-white border border-blue-200 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-semibold text-blue-700 rounded-xl flex items-center gap-2" aria-label="Next page" type="button">
+                    Next
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        </div>
+    </dialog>
+
+    <script>
+      
+      // ===== SECURITY FUNCTIONS =====
+      
+      function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = text.toString();
+        return div.innerHTML;
+      }
+      
+      function escapeAttribute(text) {
+        if (text === null || text === undefined) return '';
+        return text.toString()
+          .replaceAll('&', '&amp;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;');
+      }
+      
+      function sanitizeInput(input) {
+        if (typeof input !== 'string') return input;
+        return input.trim().replaceAll(/[<>"'&]/g, '');
+      }
+      
+      function createSafeElement(tag, properties, textContent) {
+        const element = document.createElement(tag);
+        Object.keys(properties || {}).forEach(key => {
+          if (key === 'className') {
+            element.className = properties[key];
+          } else if (key.startsWith('data-')) {
+            element.setAttribute(key, escapeAttribute(properties[key]));
+          } else {
+            element[key] = properties[key];
+          }
+        });
+        if (textContent !== undefined) {
+          element.textContent = textContent;
+        }
+        return element;
+      }
+      
+      function setSafeHTML(element, html) {
+        if (!element) return;
+        const sanitized = html
+          .replaceAll(/<script[^>]*>.*?<\/script>/gi, '')
+          .replaceAll(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+          .replaceAll(/<object[^>]*>.*?<\/object>/gi, '')
+          .replaceAll(/<embed[^>]*>.*?<\/embed>/gi, '')
+          .replaceAll(/javascript:/gi, '')
+          .replaceAll(/on\w+\s*=/gi, '');
+        element.innerHTML = sanitized;
+      }
+      
+      class PerformanceMonitor {
+        static trackOperation(operationName, fn) {
+          const start = performance.now();
+          const result = fn();
+          const duration = performance.now() - start;
+          
+                    this.reportMetric(operationName, duration);
+          
+          return result;
+        }
+        
+        static trackAsyncOperation(operationName, fn) {
+          const start = performance.now();
+          return fn().then(result => {
+            const duration = performance.now() - start;
+                        this.reportMetric(operationName, duration);
+            return result;
+          }).catch(error => {
+            const duration = performance.now() - start;
+                        this.reportMetric(operationName + '_failed', duration);
+            throw error;
+          });
+        }
+        
+        static reportMetric(name, value) {
+          if (!globalThis.performanceMetrics) globalThis.performanceMetrics = {};
+          globalThis.performanceMetrics[name] = (globalThis.performanceMetrics[name] || []).concat(value);
+        }
+      }
+      
+      class ApiClient {
+        constructor() {
+          this.retryConfig = {
+            maxRetries: 3,
+            baseDelay: 1000,
+            maxDelay: 10000,
+            backoffFactor: 2
+          };
+        }
+        async call(functionName, ...args) {
+          return new Promise((resolve, reject) => {
+            google.script.run
+              .withSuccessHandler(result => {
+                resolve(result);
+              })
+              .withFailureHandler(error => {
+                console.error(` ${functionName} failed:`, error);
+                reject(error);
+              })
+              [functionName](...args);
+          });
+        }
+        async callWithRetry(functionName, ...args) {
+          let lastError;
+          for (let attempt = 1; attempt <= this.retryConfig.maxRetries; attempt++) {
+            try {
+              return await this.call(functionName, ...args);
+            } catch (error) {
+              lastError = error;
+              console.warn(`Attempt ${attempt} failed for ${functionName}:`, error);
+              
+              if (attempt < this.retryConfig.maxRetries) {
+                const delay = Math.min(
+                  this.retryConfig.baseDelay * Math.pow(this.retryConfig.backoffFactor, attempt - 1),
+                  this.retryConfig.maxDelay
+                );
+                await new Promise(resolve => setTimeout(resolve, delay));
+              }
+            }
+          }
+          throw lastError;
+        }
+        
+        getErrorMessage(error) {
+          if (typeof error === 'string') return error;
+          if (error && error.message) return error.message;
+          return 'An unexpected error occurred';
+        }
+      }
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+      
+      function throttle(func, limit) {
+        let inThrottle;
+        return function(...args) {
+          if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+          }
+        };
+      }
+      
+      // ===== ACTIVITY LOGGING (NON-BLOCKING) =====
+      function logActivity(action, details = '', status = 'success') {
+        // Log to browser console for debugging
+        console.log(`[LOG] ${action}: ${details}`);
+        
+        // Fire and forget - call immediately (not in setTimeout)
+        try {
+          google.script.run
+            .withSuccessHandler(() => {
+              console.log(`[LOG_SENT] ${action}`);
+            })
+            .withFailureHandler((err) => {
+              console.error(`[LOG_ERROR] ${action}: ${err}`);
+            })
+            .logActivity(action, details, status);
+        } catch (e) {
+          console.error('Logging error:', e);
+        }
+      }
+      
+      function flushLogs() {
+        // Flush the log queue immediately
+        try {
+          console.log('[FLUSH] Flushing activity logs');
+          google.script.run
+            .withSuccessHandler((result) => {
+              console.log('[FLUSH_SUCCESS]', result);
+            })
+            .withFailureHandler((err) => {
+              console.error('[FLUSH_ERROR]', err);
+            })
+            .flushActivityLogs();
+        } catch (e) {
+          console.error('Flush logs error:', e);
+        }
+      }
+      
+      const apiClient = new ApiClient();
+      
+      function scheduleUIUpdate(updateFn) {
+        if (globalThis.requestAnimationFrame) {
+          requestAnimationFrame(updateFn);
+        } else {
+          setTimeout(updateFn, 0);
+        }
+      }
+      function batchDOMUpdates(updates) {
+        return new Promise(resolve => {
+          scheduleUIUpdate(() => {
+            updates.forEach(update => update());
+            resolve();
+          });
+        });
+      }
+      function createOptions(data, container) {
+        const fragment = document.createDocumentFragment();
+        data.forEach(item => {
+          const option = document.createElement('option');
+          option.value = item;
+          option.textContent = item;
+          fragment.appendChild(option);
+        });
+        return fragment;
+      }
+      function fastClassToggle(element, ...classes) {
+        if (!element) return;
+        
+        const classList = element.classList;
+        classes.forEach(cls => {
+          if (cls.startsWith('!')) {
+            classList.remove(cls.slice(1));
+          } else {
+            classList.add(cls);
+          }
+        });
+      }
+      function fastModalShow(modalId) {
+        const modal = document.getElementById(modalId);
+        const mainApp = document.getElementById('mainApp');
+        if (modal) {
+          modal.style.display = 'flex';
+          modal.style.opacity = '0';
+          scheduleUIUpdate(() => {
+            modal.classList.remove('hidden');
+            modal.style.opacity = '1';
+            document.body.style.overflow = 'hidden';
+            // Apply blur to the entire main content
+            mainApp.style.filter = 'blur(8px)';
+            mainApp.style.pointerEvents = 'none';
+          });
+        }
+      }
+      
+      function fastModalHide(modalId) {
+        const modal = document.getElementById(modalId);
+        const mainApp = document.getElementById('mainApp');
+        if (modal) {
+          // Immediately hide the modal and restore body scroll
+          modal.classList.add('hidden');
+          document.body.style.overflow = 'auto';
+          // Remove blur from main content
+          mainApp.style.filter = 'none';
+          mainApp.style.pointerEvents = 'auto';
+          
+          // Reset modal opacity
+          modal.style.opacity = '0';
+          modal.style.display = 'none';
+        }
+      }
+      
+      const AppState = {
+        records: {
+          all: [],
+          filtered: [],
+          currentPage: 1,
+          totalPages: 1
+        },
+        editing: {
+          recordId: null,
+          inlineRow: null,
+          isEditMode: false
+        },
+        ui: {
+          modals: {
+            form: false,
+            table: false
+          },
+          loading: {
+            dashboard: false,
+            table: false,
+            form: false
+          }
+        },
+        filters: {
+          dateRange: { from: null, to: null },
+          search: '',
+          projects: [],
+          positions: []
+        },
+        preloaded: {
+          positions: false,
+          projects: false,
+          projectNumber: false,
+          tableData: false,
+          tableFilters: false
+        }
+      };
+      const StateManager = {
+        updateState(path, value) {
+          const keys = path.split('.');
+          let current = AppState;
+          
+          for (let i = 0; i < keys.length - 1; i++) {
+            current = current[keys[i]];
+          }
+          
+          current[keys[keys.length - 1]] = value;
+        },
+        
+        getState(path) {
+          const keys = path.split('.');
+          let current = AppState;
+          
+          for (const key of keys) {
+            current = current[key];
+            if (current === undefined) return undefined;
+          }
+          
+          return current;
+        },
+        
+        resetFilters() {
+          this.updateState('filters', {
+            dateRange: { from: null, to: null },
+            search: '',
+            projects: [],
+            positions: []
+          });
+        }
+      };
+      
+      let dynamicPositions = [];
+      let isFirstAddRecordPress = true;
+      let preloadedFormData = {
+        positions: false,
+        projects: false,
+        projectNumber: false,
+        tableData: false,
+        tableFilters: false
+      };
+      Object.defineProperty(globalThis, 'allRecords', {
+        get: () => StateManager.getState('records.all'),
+        set: (value) => { StateManager.updateState('records.all', value); }
+      });
+      
+      Object.defineProperty(globalThis, 'filteredRecords', {
+        get: () => StateManager.getState('records.filtered'),
+        set: (value) => { StateManager.updateState('records.filtered', value); }
+      });
+      
+      Object.defineProperty(globalThis, 'currentPage', {
+        get: () => StateManager.getState('records.currentPage'),
+        set: (value) => { StateManager.updateState('records.currentPage', value); }
+      });
+      
+      Object.defineProperty(globalThis, 'editingRecordId', {
+        get: () => StateManager.getState('editing.recordId'),
+        set: (value) => { StateManager.updateState('editing.recordId', value); }
+      });
+      function formatDateToDisplay(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: 'long', year: 'numeric' };
+        return date.toLocaleDateString('en-GB', options);
+      }
+      document.addEventListener('DOMContentLoaded', function() {
+        const projNameInput = document.querySelector('[name="projName"]');
+        if (projNameInput) {
+          projNameInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+          });
+        }
+        preloadFormData();
+        (async () => {
+          try {
+            const positions = await apiClient.call('getPositions');
+            dynamicPositions = positions;
+            addNewEntryRows(); 
+          } catch (error) {
+            console.error('Failed to load positions:', error);
+          }
+        })();
+        loadDashboardStats();
+        
+        // Set up periodic log flushing (every 30 seconds) to ensure no logs are lost
+        setInterval(flushLogs, 30000);
+        
+        // Also flush logs when page is about to unload
+        window.addEventListener('beforeunload', flushLogs);
+        
+        logActivity('PAGE_LOADED', 'User accessed the Service Contracts Dashboard');
+      });
+
+      function openModal(id) {
+        fastModalShow(id);
+      }
+
+      function closeModal(id) {
+        fastModalHide(id);
+        if (id === 'formModal' && inlineEditingRow !== null) {
+          cancelInlineEdit(inlineEditingRow);
+        }
+        
+        // Add fallback to ensure modal closes
+        setTimeout(() => {
+          const modal = document.getElementById(id);
+          if (modal && !modal.classList.contains('hidden')) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+          }
+        }, 100);
+        
+        // Flush activity logs asynchronously
+        flushLogs();
+      }
+
+      async function preloadFormData() {
+        
+        try {
+          const [positions, projects, tableData] = await Promise.all([
+            apiClient.call('getPositions'),
+            apiClient.call('getProjectList'),
+            apiClient.call('getData')
+          ]);
+          
+          // Batch UI updates for smooth rendering
+          await batchDOMUpdates([
+            () => {
+              dynamicPositions = positions;
+              preloadedFormData.positions = true;
+            },
+            () => {
+              const datalist = document.getElementById('projectList');
+              if (datalist) {
+                datalist.innerHTML = '';
+                datalist.appendChild(createOptions(projects));
+              }
+              preloadedFormData.projects = true;
+            },
+            () => {
+              preloadedFormData.projectNumber = true;
+            },
+            () => {
+              StateManager.updateState('records.all', (tableData || []).map((row, index) => [index + 1, ...row])); 
+              StateManager.updateState('records.filtered', StateManager.getState('records.all'));
+              preloadedFormData.tableData = true;
+            }
+          ]);
+          await preloadTableFilters();
+          
+          preloadedFormData.allLoaded = true;
+        } catch (error) {
+          console.error(' Error preloading form data:', error);
+        }
+      }
+
+      async function preloadTableFilters() {
+        
+        try {
+          const [projects, positions] = await Promise.all([
+            apiClient.call('getProjectList'),
+            apiClient.call('getPositions')
+          ]);
+          
+          // Batch UI updates for smooth rendering
+          await batchDOMUpdates([
+            () => {
+              const projectFilter = document.getElementById('tableProjectFilter');
+              if (projectFilter) {
+                projectFilter.innerHTML = '';
+                
+                if (projects && projects.length > 0) {
+                  projectFilter.appendChild(createOptions(projects));
+                  
+                  // Add event listener if not already added
+                  if (!projectFilter.dataset.listenerAdded) {
+                    projectFilter.addEventListener('change', applyTableFilters);
+                    projectFilter.dataset.listenerAdded = 'true';
+                  }
+                }
+              }
+            },
+            () => {
+              const positionFilter = document.getElementById('tablePositionFilter');
+              if (positionFilter) {
+                positionFilter.innerHTML = '';
+                
+                if (positions && positions.length > 0) {
+                  positionFilter.appendChild(createOptions(positions));
+                  
+                  // Add event listener if not already added
+                  if (!positionFilter.dataset.listenerAdded) {
+                    positionFilter.addEventListener('change', applyTableFilters);
+                    positionFilter.dataset.listenerAdded = 'true';
+                  }
+                }
+              }
+            }
+          ]);
+          
+          preloadedFormData.tableFilters = true;
+        } catch (error) {
+          console.error(' Error preloading table filters:', error);
+        }
+      }
+
+      async function loadFormDataAndOpenModal() {
+        scheduleUIUpdate(() => openModal('formModal'));
+        
+        if (!isFirstAddRecordPress) {
+          scheduleUIUpdate(() => {
+            document.getElementById('formLoadingIndicator').classList.add('hidden');
+            document.getElementById('formContent').classList.remove('hidden');
+            addNewEntryRows();
+          });
+          return;
+        }
+        if (preloadedFormData.positions && preloadedFormData.projects && preloadedFormData.projectNumber) {
+          scheduleUIUpdate(() => {
+            document.getElementById('formLoadingIndicator').classList.add('hidden');
+            document.getElementById('formContent').classList.remove('hidden');
+            addNewEntryRows();
+          });
+          isFirstAddRecordPress = false;
+          return;
+        }
+        
+        
+        try {
+          const [positions, projects] = await Promise.all([
+            apiClient.call('getPositions'),
+            apiClient.call('getProjectList')
+          ]);
+          
+          // Batch UI updates for smooth rendering
+          await batchDOMUpdates([
+            () => {
+              dynamicPositions = positions;
+            },
+            () => {
+              const datalist = document.getElementById('projectList');
+              if (datalist) {
+                datalist.innerHTML = '';
+                datalist.appendChild(createOptions(projects));
+              }
+            },
+            () => {
+                document.getElementById('formLoadingIndicator').classList.add('hidden');
+              document.getElementById('formContent').classList.remove('hidden');
+              addNewEntryRows();
+              isFirstAddRecordPress = false;
+            }
+          ]);
+          
+        } catch (error) {
+          console.error(' Error loading form data:', error);
+          scheduleUIUpdate(() => {
+            document.getElementById('formLoadingIndicator').classList.add('hidden');
+            document.getElementById('formContent').classList.remove('hidden');
+            addNewEntryRows();
+            isFirstAddRecordPress = false;
+          });
+        }
+      }
+      function loadPositions() {
+        google.script.run
+          .withSuccessHandler(function(positions) {
+            dynamicPositions = positions;
+          }).getPositions();
+
+        google.script.run
+          .getProjectNumber();
+
+        google.script.run
+          .withSuccessHandler(function(projects) {
+              const datalist = document.getElementById('projectList');
+              datalist.innerHTML = '';
+              if (projects && Array.isArray(projects) && projects.length > 0) {
+                  projects.forEach(proj => {
+                      const option = document.createElement('option');
+                      option.value = proj;
+                      datalist.appendChild(option);
+                  });
+              }
+          })
+          .getProjectList();
+
+          google.script.run
+          .withSuccessHandler(function(data) {
+            StateManager.updateState('records.all', (data || []).map((row, index) => [index + 1, ...row]));
+            StateManager.updateState('records.filtered', StateManager.getState('records.all'));
+            renderTable();
+          })
+          .withFailureHandler(error => {
+            console.error('Error loading data:', error);
+            StateManager.updateState('records.all', []);
+            StateManager.updateState('records.filtered', []);
+            renderTable();
+          })
+          .getData();
+      }
+
+
+      // Date Range Filter Functions
+      function applyDateRangeFilter() {
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
+        
+        
+        
+        if (new Date(dateFrom) > new Date(dateTo)) {
+          return;
+        }
+        
+        const fromDate = new Date(dateFrom).toLocaleDateString();
+        const toDate = new Date(dateTo).toLocaleDateString();
+        document.getElementById('dateRangeInfo').textContent = 
+          `Showing records from ${fromDate} to ${toDate}`;
+        google.script.run
+          .withSuccessHandler(function(result) {
+            if (!result.success) {
+              console.error("❌ Failed to update Report sheet:", result.error);
+            }
+          })
+          .withFailureHandler(function(error) {
+            console.error("❌ Error updating Report sheet:", error);
+          })
+          .updateReportSheet(dateFrom, dateTo);
+        loadDashboardStats();
+      }
+      
+      function handleDateChange() {
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
+        
+        if (dateFrom && dateTo) {
+          if (new Date(dateFrom) > new Date(dateTo)) {
+            const dateRangeInfo = document.getElementById('dateRangeInfo');
+            dateRangeInfo.textContent = 'From date cannot be later than To date';
+            dateRangeInfo.className = 'text-sm text-red-600 font-medium';
+            
+            setTimeout(() => {
+              dateRangeInfo.textContent = 'Showing all records. Select a date range to filter dashboard statistics.';
+              dateRangeInfo.className = 'text-sm text-gray-600';
+            }, 3000);
+            return;
+          }
+          applyDateRangeFilter();
+        } else {
+          document.getElementById('dateRangeInfo').textContent = 
+            'Showing all records. Select a date range to filter dashboard statistics.';
+          loadDashboardStats();
+        }
+      }
+      
+      function resetDateRangeFilter() {
+        document.getElementById('dateFrom').value = '';
+        document.getElementById('dateTo').value = '';
+        document.getElementById('dateRangeInfo').textContent = 
+          'Showing all records. Select a date range to filter dashboard statistics.';
+        
+        loadDashboardStats();
+      }
+      let tableFilterPresets = [];
+      let currentTablePresetName = '';
+      
+      function toggleAdvancedFilters() {
+        const filterSection = document.getElementById('advancedFiltersSection');
+        const toggleIcon = document.getElementById('filterToggleIcon');
+        
+        if (filterSection.classList.contains('hidden')) {
+          filterSection.classList.remove('hidden');
+          toggleIcon.classList.remove('fa-chevron-down');
+          toggleIcon.classList.add('fa-chevron-up');
+          if (document.getElementById('tableProjectFilter').options.length === 0) {
+            if (!preloadedFormData.tableFilters) {
+              initializeTableFilters();
+            }
+          }
+        } else {
+          filterSection.classList.add('hidden');
+          toggleIcon.classList.remove('fa-chevron-up');
+          toggleIcon.classList.add('fa-chevron-down');
+        }
+      }
+      
+      function initializeTableFilters() {
+        google.script.run
+          .withSuccessHandler(function(projects) {
+            const projectFilter = document.getElementById('tableProjectFilter');
+            projectFilter.innerHTML = '';
+            
+            if (projects && projects.length > 0) {
+              projects.sort().forEach(project => {
+                const option = document.createElement('option');
+                option.value = project;
+                option.textContent = project;
+                projectFilter.appendChild(option);
+              });
+            }
+          })
+          .withFailureHandler(function(error) {
+            console.error('❌ Failed to load projects for table filter:', error);
+          })
+          .getProjectList();
+        google.script.run
+          .withSuccessHandler(function(positions) {
+            const positionFilter = document.getElementById('tablePositionFilter');
+            positionFilter.innerHTML = '';
+            
+            if (positions && positions.length > 0) {
+              positions.sort().forEach(position => {
+                const option = document.createElement('option');
+                option.value = position;
+                option.textContent = position;
+                positionFilter.appendChild(option);
+              });
+            }
+          })
+          .withFailureHandler(function(error) {
+            console.error('❌ Failed to load positions for table filter:', error);
+          })
+          .getPositions();
+        document.getElementById('tableProjectFilter').addEventListener('change', applyTableFilters);
+        document.getElementById('tablePositionFilter').addEventListener('change', applyTableFilters);
+        loadTablePresetsFromStorage();
+      }
+      
+      function applyTableFilters() {
+        
+        const selectedProjects = Array.from(document.getElementById('tableProjectFilter').selectedOptions).map(opt => opt.value);
+        const selectedPositions = Array.from(document.getElementById('tablePositionFilter').selectedOptions).map(opt => opt.value);
+        
+        const allRecordsForFiltering = StateManager.getState('records.all');
+        const filterCount = selectedProjects.length + selectedPositions.length;
+        document.getElementById('tableFilterCount').textContent = filterCount;
+        
+        // Non-blocking logging
+        if (filterCount > 0) {
+          logActivity('FILTER_APPLIED', `Projects: ${selectedProjects.length}, Positions: ${selectedPositions.length}`);
+        }
+        
+        if (allRecordsForFiltering && allRecordsForFiltering.length > 0) {
+          let baseRecords = [...allRecordsForFiltering];
+          
+          const searchText = document.getElementById("tableSearch").value.trim();
+          if (searchText !== '') {
+            const searchTerms = searchText.toUpperCase().split(' ').filter(term => term.length > 0);
+            baseRecords = baseRecords.filter(row => {
+              const rowText = row.map(cell => cell ? cell.toString().toUpperCase() : '').join(' ');
+              return searchTerms.every(term => rowText.includes(term));
+            });
+          }
+          
+          const filteredResults = baseRecords.filter(record => {
+            if (selectedProjects.length > 0) {
+              const recordProject = (record[10] || '').trim();
+              const projectMatch = selectedProjects.some(selected => 
+                selected.toLowerCase() === recordProject.toLowerCase()
+              );
+              if (!projectMatch) {
+                return false;
+              }
+            }
+            if (selectedPositions.length > 0) {
+              const recordPosition = (record[7] || '').trim();
+              const positionMatch = selectedPositions.some(selected => 
+                selected.toLowerCase() === recordPosition.toLowerCase()
+              );
+              if (!positionMatch) {
+                return false;
+              }
+            }
+            
+            return true;
+          });
+          StateManager.updateState('records.filtered', filteredResults);
+          document.getElementById('tableFilterResults').textContent = filteredResults.length;
+          StateManager.updateState('records.currentPage', 1);
+          renderTable();
+        }
+      }
+      
+      function saveTableFilterPreset() {
+        const selectedProjects = Array.from(document.getElementById('tableProjectFilter').selectedOptions).map(opt => opt.value);
+        const selectedPositions = Array.from(document.getElementById('tablePositionFilter').selectedOptions).map(opt => opt.value);
+        
+        if (selectedProjects.length === 0 && selectedPositions.length === 0) {
+          alert('Please select at least one filter option before saving a preset.');
+          return;
+        }
+        
+        const presetName = prompt('Enter a name for this filter preset:');
+        if (!presetName || presetName.trim() === '') {
+          return;
+        }
+        
+        const preset = {
+          name: presetName.trim(),
+          projects: selectedProjects,
+          positions: selectedPositions,
+          created: new Date().toISOString()
+        };
+        const existingIndex = tableFilterPresets.findIndex(p => p.name === preset.name);
+        if (existingIndex >= 0) {
+          if (confirm('A preset with this name already exists. Overwrite it?')) {
+            tableFilterPresets[existingIndex] = preset;
+          } else {
+            return;
+          }
+        } else {
+          tableFilterPresets.push(preset);
+        }
+        saveTablePresetsToStorage();
+        
+        // Update current preset display
+        currentTablePresetName = preset.name;
+        document.getElementById('tableCurrentPreset').textContent = `Preset: ${preset.name}`;
+        
+        alert(`Filter preset "${preset.name}" saved successfully!`);
+      }
+      
+      function loadTableFilterPreset() {
+        if (tableFilterPresets.length === 0) {
+          alert('No saved presets found. Create and save a filter preset first.');
+          return;
+        }
+        
+        // Create preset selection dialog
+        const presetOptions = tableFilterPresets.map((preset, index) => 
+          `${index + 1}. ${preset.name} (${preset.projects.length + preset.positions.length} filters)`
+        ).join('\n');
+        
+        const selection = prompt(`Select a preset to load:\n\n${presetOptions}\n\nEnter the number (1-${tableFilterPresets.length}):`);
+        
+        if (!selection || selection.trim() === '') {
+          return;
+        }
+        
+        const presetIndex = Number.parseInt(selection) - 1;
+        if (Number.isNaN(presetIndex) || presetIndex < 0 || presetIndex >= tableFilterPresets.length) {
+          alert('Invalid selection. Please enter a valid number.');
+          return;
+        }
+        
+        const preset = tableFilterPresets[presetIndex];
+        
+        // Clear current selections
+        document.getElementById('tableProjectFilter').selectedIndex = -1;
+        document.getElementById('tablePositionFilter').selectedIndex = -1;
+        
+        // Apply preset selections
+        const projectFilter = document.getElementById('tableProjectFilter');
+        preset.projects.forEach(project => {
+          for (const option of projectFilter.options) {
+            if (option.value === project) {
+              option.selected = true;
+              break;
+            }
+          }
+        });
+        
+        const positionFilter = document.getElementById('tablePositionFilter');
+        preset.positions.forEach(position => {
+          for (const option of positionFilter.options) {
+            if (option.value === position) {
+              option.selected = true;
+              break;
+            }
+          }
+        });
+        
+        // Update current preset display
+        currentTablePresetName = preset.name;
+        document.getElementById('tableCurrentPreset').textContent = `Preset: ${preset.name}`;
+        
+        // Apply the filters
+        applyTableFilters();
+        
+        alert(`Filter preset "${preset.name}" loaded successfully!`);
+      }
+      
+      function resetTableFilters() {
+        
+        // Clear all selections
+        const projectFilter = document.getElementById('tableProjectFilter');
+        const positionFilter = document.getElementById('tablePositionFilter');
+        const searchBox = document.getElementById('tableSearch');
+        
+        
+        if (projectFilter) projectFilter.selectedIndex = -1;
+        if (positionFilter) positionFilter.selectedIndex = -1;
+        
+        // Clear search box
+        if (searchBox) {
+          searchBox.value = '';
+        }
+        
+        // Reset displays (with null checks)
+        const filterCountEl = document.getElementById('tableFilterCount');
+        const filterResultsEl = document.getElementById('tableFilterResults');
+        const currentPresetEl = document.getElementById('tableCurrentPreset');
+        
+        if (filterCountEl) filterCountEl.textContent = '0';
+        if (filterResultsEl) filterResultsEl.textContent = '-';
+        if (currentPresetEl) currentPresetEl.textContent = 'No preset';
+        currentTablePresetName = '';
+        
+        // Reset filtered records to all records
+        const allRecordsForReset = StateManager.getState('records.all');
+        if (allRecordsForReset) {
+          StateManager.updateState('records.filtered', [...allRecordsForReset]);
+          StateManager.updateState('records.currentPage', 1);
+          renderTable();
+        }
+        
+      }
+      
+      function saveTablePresetsToStorage() {
+        try {
+          localStorage.setItem('tableFilterPresets', JSON.stringify(tableFilterPresets));
+        } catch (error) {
+          console.error('❌ Failed to save table presets to localStorage:', error);
+        }
+      }
+      
+      function loadTablePresetsFromStorage() {
+        try {
+          const saved = localStorage.getItem('tableFilterPresets');
+          if (saved) {
+            tableFilterPresets = JSON.parse(saved);
+          }
+        } catch (error) {
+          console.error('❌ Failed to load table presets from localStorage:', error);
+        }
+      }
+
+      // Manual test function - call this from browser console
+      function testDashboardStats() {
+        loadDashboardStats();
+      }
+      
+      // Enhanced dashboard stats loading with error handling
+      async function loadDashboardStats() {
+        // Prevent duplicate calls
+        if (isLoadingDashboardStats) {
+          return;
+        }
+        
+        isLoadingDashboardStats = true;
+        
+        // Check if Google Apps Script is available
+        if (typeof google === 'undefined' || !google.script || !google.script.run) {
+          console.error("❌ Google Apps Script API not available!");
+          return updateDashboardWithFallback();
+        }
+        
+        // First, let's check if the elements exist
+        const projectsEl = document.getElementById('projectsCount');
+        const personnelEl = document.getElementById('personnelCount');
+        const activityEl = document.getElementById('recentActivityCount');
+        
+        if (!projectsEl || !personnelEl || !activityEl) {
+          console.error("❌ Dashboard elements not found!");
+          return;
+        }
+        
+        // Show loading state
+        projectsEl.innerText = '...';
+        personnelEl.innerText = '...';
+        activityEl.innerText = '...';
+        
+        // Get date range values
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
+        
+        
+        try {
+          // Use enhanced API client with retry mechanism
+          const stats = await apiClient.call('getDashboardStats', dateFrom, dateTo);
+          
+          
+          // Update the dashboard cards with the received statistics
+          projectsEl.innerText = stats.projects || '0';
+          personnelEl.innerText = stats.personnel || '0';
+          activityEl.innerText = stats.recentActivity || '0';
+          
+          
+        } catch (error) {
+          console.error('❌ Failed to load dashboard stats:', error);
+          showNotification(apiClient.getErrorMessage(error), 'error');
+          
+          // Fallback to using getData() function
+          updateDashboardWithFallback();
+        } finally {
+          isLoadingDashboardStats = false;
+        }
+      }
+      
+      function updateDashboardWithFallback() {
+        const projectsEl = document.getElementById('projectsCount');
+        const personnelEl = document.getElementById('personnelCount');
+        const activityEl = document.getElementById('recentActivityCount');
+        
+        if (!projectsEl || !personnelEl || !activityEl) {
+          console.error("❌ Dashboard elements not found in fallback!");
+          return;
+        }
+        
+        // Show loading state
+        projectsEl.innerText = '...';
+        personnelEl.innerText = '...';
+        activityEl.innerText = '...';
+        
+        google.script.run
+          .withSuccessHandler(function(data) {
+            
+            if (!data || data.length === 0) {
+              projectsEl.innerText = '0';
+              personnelEl.innerText = '0';
+              activityEl.innerText = '0';
+              return;
+            }
+            
+            // Calculate statistics from the data
+            let projects = new Set();
+            let personnelCount = 0;
+            let recentActivityCount = 0;
+            
+            // Get date range values for fallback
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            
+            // Parse date range if provided
+            let fromDate = null;
+            let toDate = null;
+            
+            if (dateFrom && dateTo) {
+              fromDate = new Date(dateFrom);
+              toDate = new Date(dateTo);
+              toDate.setHours(23, 59, 59, 999);
+            }
+            
+            data.forEach((row, index) => {
+              
+              // Apply date filter if specified
+              if (fromDate && toDate && row[0]) {
+                const recordDate = new Date(row[0]);
+                if (recordDate < fromDate || recordDate > toDate) {
+                  return; // Skip this record
+                }
+              }
+              
+              // Count projects (column 10, index 9)
+              if (row[9]) {
+                projects.add(row[9]);
+              }
+              
+              // Count personnel (column 2, index 1)
+              if (row[1]) {
+                personnelCount++;
+              }
+              
+              // Count recent activity (all records in the filtered date range)
+              if (row[0]) {
+                recentActivityCount++;
+              }
+            });
+            
+            
+            projectsEl.innerText = projects.size;
+            personnelEl.innerText = personnelCount;
+            activityEl.innerText = recentActivityCount;
+            
+          })
+          .withFailureHandler(function(error) {
+            console.error('❌ Fallback also failed:', error);
+            projectsEl.innerText = 'ERR';
+            personnelEl.innerText = 'ERR';
+            activityEl.innerText = 'ERR';
+          })
+          .getData();
+      }
+      
+      // Export Report function
+      function exportReport(format) {
+        logActivity('EXPORT_REPORT_START', `Format: ${format}`);
+        
+        // Get current date range
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
+        
+        // Validate that date range is set
+        if (!dateFrom || !dateTo) {
+          logActivity('EXPORT_REPORT_FAILED', 'Date range not set', 'error');
+          const msgEl = document.getElementById('msg');
+          const dateFromEl = document.getElementById('dateFrom');
+          const dateToEl = document.getElementById('dateTo');
+          
+          // Highlight missing date fields
+          if (!dateFrom) {
+            dateFromEl.classList.add('border-2', 'border-red-500', 'bg-red-50', 'ring-2', 'ring-red-200');
+          }
+          if (!dateTo) {
+            dateToEl.classList.add('border-2', 'border-red-500', 'bg-red-50', 'ring-2', 'ring-red-200');
+          }
+          
+          // Show error message
+          msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-red-600";
+          msgEl.textContent = "⚠️ Please set both start and end dates in the date range filter before generating a report.";
+          msgEl.classList.remove('hidden');
+          
+          // Auto-hide the message and remove highlights after 5 seconds
+          setTimeout(() => {
+            msgEl.classList.add('hidden');
+            dateFromEl.classList.remove('border-2', 'border-red-500', 'bg-red-50', 'ring-2', 'ring-red-200');
+            dateToEl.classList.remove('border-2', 'border-red-500', 'bg-red-50', 'ring-2', 'ring-red-200');
+          }, 5000);
+          
+          return;
+        }
+        
+        // Validate that date range is logical (from date should be before or equal to to date)
+        if (new Date(dateFrom) > new Date(dateTo)) {
+          const msgEl = document.getElementById('msg');
+          const dateFromEl = document.getElementById('dateFrom');
+          const dateToEl = document.getElementById('dateTo');
+          
+          // Highlight both fields for invalid range
+          dateFromEl.classList.add('border-2', 'border-red-500', 'bg-red-50', 'ring-2', 'ring-red-200');
+          dateToEl.classList.add('border-2', 'border-red-500', 'bg-red-50', 'ring-2', 'ring-red-200');
+          
+          msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-red-600";
+          msgEl.textContent = "⚠️ The start date cannot be later than the end date. Please adjust your date range.";
+          msgEl.classList.remove('hidden');
+          
+          // Auto-hide the message and remove highlights after 5 seconds
+          setTimeout(() => {
+            msgEl.classList.add('hidden');
+            dateFromEl.classList.remove('border-2', 'border-red-500', 'bg-red-50', 'ring-2', 'ring-red-200');
+            dateToEl.classList.remove('border-2', 'border-red-500', 'bg-red-50', 'ring-2', 'ring-red-200');
+          }, 5000);
+          
+          return;
+        }
+        
+        // Show loading message
+        const msgEl = document.getElementById('msg');
+        msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect animate-pulse-slow text-blue-600";
+        msgEl.textContent = `Updating Report sheet with date range and preparing export...`;
+        msgEl.classList.remove('hidden');
+        
+        // First update the Report sheet with date range
+        google.script.run
+          .withSuccessHandler(function(updateResult) {
+            if (updateResult.success) {
+              
+              // Now read the Report sheet data
+              google.script.run
+                .withSuccessHandler(function(reportData) {
+                  
+                  // Add null check
+                  if (!reportData) {
+                    console.error("❌ Report sheet data is null");
+                    msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-red-600";
+                    msgEl.textContent = `Failed to read Report sheet: No data received`;
+                    return;
+                  }
+                  
+                  if (reportData.success) {
+                    
+                    // Generate Excel file client-side
+                    generateExcelFile(reportData, msgEl);
+                  } else {
+                    console.error("❌ Failed to read Report sheet:", reportData.error);
+                    msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-red-600";
+                    msgEl.textContent = `Failed to read Report sheet: ${reportData.error}`;
+                  }
+                })
+                .withFailureHandler(function(error) {
+                  console.error("❌ Failed to read Report sheet:", error);
+                  msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-red-600";
+                  msgEl.textContent = `Failed to read Report sheet: ${error}`;
+                })
+                .readReportSheet();
+            } else {
+              console.error("❌ Failed to update Report sheet:", updateResult.error);
+              msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-red-600";
+              msgEl.textContent = `Failed to update Report sheet: ${updateResult.error}`;
+            }
+          })
+          .withFailureHandler(function(error) {
+            console.error("❌ Failed to update Report sheet:", error);
+            msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-red-600";
+            msgEl.textContent = `Failed to update Report sheet: ${error}`;
+          })
+          .updateReportSheet(dateFrom, dateTo);
+      }
+      
+      // Generate Excel file client-side
+      function generateExcelFile(reportData, msgEl) {
+        try {
+          
+          // Add null checks
+          if (!reportData) {
+            console.error("❌ Report data is null in generateExcelFile");
+            msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-red-600";
+            msgEl.textContent = `Failed to generate Excel: No data available`;
+            return;
+          }
+          
+          if (!reportData.headers || !reportData.data) {
+            console.error("❌ Report data structure is incomplete:", reportData);
+            msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-red-600";
+            msgEl.textContent = `Failed to generate Excel: Invalid data structure`;
+            return;
+          }
+          
+          // Convert data to worksheet format
+          const ws_data = [reportData.headers];
+          reportData.data.forEach(row => {
+            const rowData = reportData.headers.map(header => row[header] || '');
+            ws_data.push(rowData);
+          });
+          
+          // Create workbook
+          const ws = XLSX.utils.aoa_to_sheet(ws_data);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Report");
+          
+          // Generate filename with date range
+          const dateFrom = document.getElementById('dateFrom').value;
+          const dateTo = document.getElementById('dateTo').value;
+          const filename = dateFrom && dateTo 
+            ? `Service_Contracts_Report_${dateFrom}_to_${dateTo}.xlsx`
+            : 'Service_Contracts_Report.xlsx';
+          
+          // Write file and trigger download
+          XLSX.writeFile(wb, filename);
+          
+          // Show success message
+          msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-green-600";
+          msgEl.textContent = `Report exported successfully as EXCEL!`;
+          
+          // Hide message after 3 seconds
+          setTimeout(() => {
+            msgEl.classList.add('hidden');
+          }, 3000);
+          
+        } catch (error) {
+          console.error("❌ Error generating Excel file:", error);
+          msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-red-600";
+          msgEl.textContent = `Failed to generate Excel file: ${error}`;
+        }
+      }
+      
+      // Generate PDF using backend (fallback)
+      function generatePDFFile(msgEl) {
+        
+        google.script.run
+          .withSuccessHandler(function(response) {
+            if (response.success) {
+              
+              // Create download link using URL
+              const a = document.createElement('a');
+              a.href = response.downloadUrl;
+              a.download = response.filename;
+              a.target = '_blank';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              
+              // Show success message
+              msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-green-600";
+              msgEl.textContent = `Report exported successfully as PDF!`;
+              
+              // Hide message after 3 seconds
+              setTimeout(() => {
+                msgEl.classList.add('hidden');
+              }, 3000);
+            } else {
+              console.error("❌ Failed to generate PDF:", response.error);
+              msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-red-600";
+              msgEl.textContent = `Failed to generate PDF: ${response.error}`;
+            }
+          })
+          .withFailureHandler(function(error) {
+            console.error("❌ Failed to generate PDF:", error);
+            msgEl.className = "mt-6 text-center font-medium p-4 rounded-xl glass-effect text-red-600";
+            msgEl.textContent = `Failed to generate PDF: ${error}`;
+          })
+          .exportReportAsPDF();
+      }
+
+      let allRecords = []; // Global store for the fetched data
+      let filteredRecords = []; // Add this
+      let currentPage = 1;
+      const recordsPerPage = 10; // Adjust this number as needed
+      const BATCH_SIZE = 20; // Progressive loading batch size
+      let editingRecordId = null; // Track which record is being edited (by # column value)
+      
+      // Loading flags to prevent duplicate API calls
+      let isLoadingDashboardStats = false;
+      let isLoadingTableData = false;
+
+      async function loadTableDataTest() {
+        // Prevent duplicate calls
+        if (isLoadingTableData) {
+          return;
+        }
+        
+        isLoadingTableData = true;
+        logActivity('VIEW_RECORDS_OPENED', 'User opened View All Records modal');
+        openModal('tableModal');
+        const tbody = document.getElementById('tableBody');
+        
+        // Clear search field when View All Records is clicked
+        document.getElementById('tableSearch').value = '';
+
+        // Check if data is already preloaded
+        const allRecordsForCheck = StateManager.getState('records.all');
+        if (preloadedFormData.tableData && allRecordsForCheck && allRecordsForCheck.length > 0) {
+          StateManager.updateState('records.currentPage', 1);
+          renderTable(); // Instant display
+          isLoadingTableData = false;
+          logActivity('VIEW_RECORDS_LOADED', `Displayed ${allRecordsForCheck.length} preloaded records`);
+          return;
+        }
+
+        // Show loading indicator
+        tbody.innerHTML = '<tr><td colspan="12" class="p-10 text-center text-gray-600"><div class="inline-flex gap-1"><div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0ms"></div><div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div><div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 300ms"></div></div></td></tr>';
+
+        // Load positions first (if not already loaded)
+        if (dynamicPositions.length === 0) {
+          try {
+            dynamicPositions = await apiClient.call('getPositions');
+          } catch (error) {
+            console.error('Failed to load positions:', error);
+          }
+        }
+
+        try {
+          // Load table data with enhanced API client
+          const data = await apiClient.call('getData');
+          
+          // Update state with fresh data
+          StateManager.updateState('records.all', (data || []).map((row, index) => [index + 1, ...row]));
+          StateManager.updateState('records.filtered', StateManager.getState('records.all'));
+          StateManager.updateState('records.currentPage', 1);
+          
+          // Update preloaded data flag for future instant loads
+          preloadedFormData.tableData = true;
+          
+          renderTable();
+          
+        } catch (error) {
+          console.error('❌ Failed to load table data:', error);
+          tbody.innerHTML = '<tr><td colspan="12" class="p-10 text-center text-red-500">Error loading data. Please try again.</td></tr>';
+          
+          // Reset state on error
+          StateManager.updateState('records.all', []);
+          StateManager.updateState('records.filtered', []);
+          StateManager.updateState('records.currentPage', 1);
+          
+          showNotification('Failed to load table data. Please try again.', 'error');
+        } finally {
+          isLoadingTableData = false;
+        }
+      }
+
+      let inlineEditingRow = null;
+      
+      function toggleInlineEdit(rowIndex) {
+        const allRecordsForEdit = StateManager.getState('records.all');
+        const record = allRecordsForEdit[rowIndex];
+        if (!record) {
+          console.error('Record not found at index:', rowIndex);
+          showNotification('Record not found', 'error');
+          return;
+        }
+        
+        // If already editing this row, do nothing (user must click Save or Cancel)
+        if (inlineEditingRow === rowIndex) {
+          return;
+        }
+        
+        // If editing another row, cancel it first instead of auto-saving
+        if (inlineEditingRow !== null && inlineEditingRow !== rowIndex) {
+          cancelInlineEdit(inlineEditingRow);
+        }
+        
+        inlineEditingRow = rowIndex;
+        
+        // Use the record's original index (stored in record[0]) to find the correct row
+        const originalRowIndex = record[0] - 1;
+        const row = document.querySelector(`tr[data-row="${originalRowIndex}"]`) || 
+                    document.querySelector(`[data-row="${originalRowIndex}"]`).closest('tr');
+        
+        if (!row) return;
+        
+        // Make editable fields
+        const nameCell = row.querySelector('[data-field="name"]');
+        const projectCell = row.querySelector('[data-field="project"]');
+        const genderCell = row.querySelector('[data-field="gender"]');
+        const positionCell = row.querySelector('[data-field="position"]');
+        const salaryCell = row.querySelector('[data-field="salary"]');
+        const emailCell = row.querySelector('[data-field="email"]');
+        
+        // Store original values
+        row.dataset.originalValues = JSON.stringify({
+          name: record[3] + ' ' + record[2],
+          project: record[10],
+          gender: record[6],
+          position: record[7],
+          salary: record[8],
+          email: record[9]
+        });
+        
+        // Create input fields safely using DOM methods
+        if (nameCell) {
+          nameCell.innerHTML = ''; // Clear first
+          
+          const firstNameInput = document.createElement('input');
+          firstNameInput.type = 'text';
+          firstNameInput.value = (record[3] || '').toUpperCase();
+          firstNameInput.className = 'w-full p-1 text-sm border rounded';
+          firstNameInput.placeholder = 'First Name';
+          firstNameInput.dataset.subfield = 'firstName';
+          nameCell.appendChild(firstNameInput);
+          
+          const lastNameInput = document.createElement('input');
+          lastNameInput.type = 'text';
+          lastNameInput.value = (record[2] || '').toUpperCase();
+          lastNameInput.className = 'w-full p-1 text-sm border rounded mt-1';
+          lastNameInput.placeholder = 'Last Name';
+          lastNameInput.dataset.subfield = 'lastName';
+          nameCell.appendChild(lastNameInput);
+        }
+        
+        if (projectCell) {
+          projectCell.innerHTML = ''; // Clear first
+          const projectInput = document.createElement('input');
+          projectInput.type = 'text';
+          projectInput.value = (record[10] || '').toUpperCase();
+          projectInput.className = 'w-full p-1 text-sm border rounded';
+          projectInput.dataset.subfield = 'project';
+          projectCell.appendChild(projectInput);
+        }
+        
+        if (genderCell) {
+          genderCell.innerHTML = ''; // Clear first
+          const genderSelect = document.createElement('select');
+          genderSelect.className = 'w-full p-1 text-sm border rounded';
+          genderSelect.dataset.subfield = 'gender';
+          
+          const maleOption = document.createElement('option');
+          maleOption.value = 'Male';
+          maleOption.textContent = 'Male';
+          maleOption.selected = record[6] === 'Male';
+          genderSelect.appendChild(maleOption);
+          
+          const femaleOption = document.createElement('option');
+          femaleOption.value = 'Female';
+          femaleOption.textContent = 'Female';
+          femaleOption.selected = record[6] === 'Female';
+          genderSelect.appendChild(femaleOption);
+          
+          genderCell.appendChild(genderSelect);
+        }
+        
+        if (positionCell) {
+          positionCell.innerHTML = ''; // Clear first
+          const positionSelect = document.createElement('select');
+          positionSelect.className = 'w-full p-1 text-sm border rounded';
+          positionSelect.dataset.subfield = 'position';
+          
+          dynamicPositions.forEach(pos => {
+            const option = document.createElement('option');
+            option.value = pos;
+            option.textContent = pos;
+            option.selected = record[7] === pos;
+            positionSelect.appendChild(option);
+          });
+          
+          positionCell.appendChild(positionSelect);
+        }
+        
+        if (salaryCell) {
+          salaryCell.innerHTML = ''; // Clear first
+          const salaryInput = document.createElement('input');
+          salaryInput.type = 'number';
+          salaryInput.value = record[8] || 0;
+          salaryInput.className = 'w-full p-1 text-sm border rounded';
+          salaryInput.dataset.subfield = 'salary';
+          salaryCell.appendChild(salaryInput);
+        }
+        
+        if (emailCell) {
+          emailCell.innerHTML = ''; // Clear first
+          const emailInput = document.createElement('input');
+          emailInput.type = 'email';
+          emailInput.value = (record[9] || '').toLowerCase();
+          emailInput.className = 'w-full p-1 text-sm border rounded';
+          emailInput.dataset.subfield = 'email';
+          emailCell.appendChild(emailInput);
+        }
+        
+        // Update edit button to become save button
+        const editBtn = row.querySelector('button');
+        if (editBtn) {
+          editBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+          editBtn.className = 'text-green-600 hover:text-green-800 font-semibold text-sm bg-green-50 px-3 py-1 rounded hover:bg-green-100 transition-all';
+          editBtn.onclick = () => saveInlineEdit(rowIndex);
+        }
+        
+        // Add cancel button
+        const actionCell = row.querySelector('td:first-child');
+        if (actionCell && !actionCell.querySelector('.cancel-btn')) {
+          const cancelBtn = document.createElement('button');
+          cancelBtn.className = 'text-gray-600 hover:text-gray-800 font-semibold text-sm bg-gray-50 px-3 py-1 rounded hover:bg-gray-100 transition-all ml-2 cancel-btn';
+          cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+          cancelBtn.onclick = () => cancelInlineEdit(rowIndex);
+          actionCell.appendChild(cancelBtn);
+        }
+      }
+      
+      function validateInlineEditData(firstName, lastName, project, gender, position, salary, email) {
+        const errors = [];
+        
+        if (!firstName && !lastName) {
+          errors.push("First Name or Last Name is required");
+        }
+        
+        if (!gender) {
+          errors.push("Gender is required");
+        }
+        
+        if (!position) {
+          errors.push("Position is required");
+        }
+        
+        if (!salary || Number.isNaN(Number.parseFloat(salary)) || Number.parseFloat(salary) <= 0) {
+          errors.push("Valid Salary is required");
+        }
+        
+        if (email && (!email.includes('@') || !email.includes('.'))) {
+          errors.push("Valid Email format required (leave empty if not available)");
+        }
+        
+        return errors;
+      }
+      
+      function extractInlineEditValues(row) {
+        return {
+          firstName: (row.querySelector('[data-subfield="firstName"]')?.value || '').toUpperCase(),
+          lastName: (row.querySelector('[data-subfield="lastName"]')?.value || '').toUpperCase(),
+          project: (row.querySelector('[data-subfield="project"]')?.value || '').toUpperCase(),
+          gender: row.querySelector('[data-subfield="gender"]')?.value || '',
+          position: row.querySelector('[data-subfield="position"]')?.value || '',
+          salary: row.querySelector('[data-subfield="salary"]')?.value || 0,
+          email: (row.querySelector('[data-subfield="email"]')?.value || '').toLowerCase()
+        };
+      }
+      
+      function updateLocalRecord(record, values) {
+        record[2] = values.lastName;
+        record[3] = values.firstName;
+        record[6] = values.gender;
+        record[7] = values.position;
+        record[8] = values.salary;
+        record[9] = values.email;
+        record[10] = values.project;
+      }
+      
+      function setSaveButtonState(saveBtn, state) {
+        if (!saveBtn) return;
+        
+        const states = {
+          loading: '<i class="fas fa-spinner fa-spin"></i> Saving...',
+          saved: '<i class="fas fa-check"></i> Saved',
+          save: '<i class="fas fa-save"></i> Save',
+          edit: '<i class="fas fa-edit"></i> Edit'
+        };
+        
+        scheduleUIUpdate(() => {
+          saveBtn.innerHTML = states[state] || states.save;
+          saveBtn.disabled = state === 'loading';
+        });
+      }
+      
+      async function handleSuccessfulUpdate(rowIndex, result, saveBtn) {
+        await batchDOMUpdates([
+          () => refreshRowDisplay(rowIndex),
+          () => { inlineEditingRow = null; },
+          () => {
+            setSaveButtonState(saveBtn, 'saved');
+            setTimeout(() => {
+              setSaveButtonState(saveBtn, 'edit');
+            }, 1000);
+          }
+        ]);
+        
+        showNotification(result.message || 'Record updated successfully!', 'success');
+      }
+      
+      function handleUpdateError(saveBtn, error) {
+        setSaveButtonState(saveBtn, 'save');
+        showNotification('Error updating record: ' + error, 'error');
+      }
+      
+      async function saveInlineEdit(rowIndex) {
+        const allRecordsForEdit = StateManager.getState('records.all');
+        const record = allRecordsForEdit[rowIndex];
+        
+        if (!record) {
+          console.error('Record not found at index:', rowIndex);
+          showNotification('Record not found', 'error');
+          return;
+        }
+        
+        const originalRowIndex = record[0] - 1;
+        const row = document.querySelector(`tr[data-row="${originalRowIndex}"]`) || 
+                    document.querySelector(`[data-row="${originalRowIndex}"]`).closest('tr');
+        
+        if (!row) return;
+        
+        const values = extractInlineEditValues(row);
+        
+        
+        const errors = validateInlineEditData(
+          values.firstName, values.lastName, values.project, 
+          values.gender, values.position, values.salary, values.email
+        );
+        
+        if (errors.length > 0) {
+          showNotification('Validation Error: ' + errors.join(', '), 'error');
+          return;
+        }
+        
+        const saveBtn = row.querySelector('.fa-save')?.parentElement;
+        setSaveButtonState(saveBtn, 'loading');
+        
+        try {
+          updateLocalRecord(record, values);
+          
+          const updatedRow = {
+            firstName: values.firstName,
+            lastName: values.lastName,
+            gender: values.gender,
+            position: values.position,
+            salary: values.salary,
+            email: values.email,
+            project: values.project
+          };
+          
+          
+          const response = await apiClient.call('updateRecordById', record[16], updatedRow);
+          
+          let result;
+          try {
+            result = typeof response === 'string' ? JSON.parse(response) : response;
+          } catch (e) {
+            console.error('Failed to parse response:', e);
+            result = { success: false, error: 'Invalid response format' };
+          }
+          
+          if (result.success) {
+            await handleSuccessfulUpdate(rowIndex, result, saveBtn);
+          } else {
+            handleUpdateError(saveBtn, result.error || 'Unknown error');
+          }
+        } catch (error) {
+          console.error('❌ Backend error:', error);
+          handleUpdateError(saveBtn, error);
+        }
+      }
+      
+      function cancelInlineEdit(rowIndex) {
+        const allRecordsForCancel = StateManager.getState('records.all');
+        const record = allRecordsForCancel[rowIndex];
+        
+        if (!record) {
+          console.error('Record not found for cancel at index:', rowIndex);
+          return;
+        }
+        
+        // Use the record's original index (stored in record[0]) to find the correct row
+        const originalRowIndex = record[0] - 1;
+        const row = document.querySelector(`tr[data-row="${originalRowIndex}"]`) || 
+                    (() => {
+                      const element = document.querySelector(`[data-row="${originalRowIndex}"]`);
+                      return element ? element.closest('tr') : null;
+                    })();
+        
+        if (!row) return;
+        
+        refreshRowDisplay(rowIndex);
+        inlineEditingRow = null;
+      }
+      
+      function refreshRowDisplay(rowIndex) {
+        const allRecordsForRefresh = StateManager.getState('records.all');
+        const record = allRecordsForRefresh[rowIndex];
+        
+        if (!record) {
+          console.error('Record not found for refresh at index:', rowIndex);
+          return;
+        }
+        
+        // Use the record's original index (stored in record[0]) to find the correct row
+        const originalRowIndex = record[0] - 1;
+        const row = document.querySelector(`tr[data-row="${originalRowIndex}"]`) || 
+                    document.querySelector(`[data-row="${originalRowIndex}"]`).closest('tr');
+        
+        if (!row) return;
+        
+        // Re-render row with updated values
+        const startStr = record[11] || '-';
+        const endStr = record[12] || '-';
+        const trainingStartStr = record[14] || '-';
+        const trainingEndStr = record[15] || '-';
+        const trainingDates = (trainingStartStr && trainingEndStr && trainingStartStr !== '-' && trainingEndStr !== '-') ? `${trainingStartStr} - ${trainingEndStr}` : '-';
+        
+        row.innerHTML = `
+          <td class="px-4 py-2 text-center">
+            <button onclick="toggleInlineEdit(${originalRowIndex})" class="text-blue-600 hover:text-blue-800 font-semibold text-sm bg-blue-50 px-3 py-1 rounded hover:bg-blue-100 transition-all">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+          </td>
+          <td class="px-4 py-2 text-sm text-gray-600 font-mono">${escapeHtml(record[13] || '-')}</td>
+          <td class="px-4 py-2 text-sm text-gray-600" style="display:none;">${escapeHtml(record[13])}</td>
+          <td class="px-4 py-2 text-sm">
+              <div class="font-medium text-gray-900" data-field="name" data-row="${originalRowIndex}">${escapeHtml((record[3] || '').toUpperCase())}${record[4] ? ' ' + escapeHtml((record[4][0] || '').toUpperCase()) + '.' : ''} ${escapeHtml((record[2] || '').toUpperCase())}${record[5] ? ' ' + escapeHtml((record[5] || '').toUpperCase()) : ''}</div>
+          </td>
+          <td class="px-4 py-2 text-sm font-bold text-gray-700" data-field="project" data-row="${originalRowIndex}">${escapeHtml((record[10] || '-').toUpperCase())}</td>
+          <td class="px-4 py-2 text-sm text-gray-600" data-field="gender" data-row="${originalRowIndex}">${escapeHtml(record[6])}</td>
+          <td class="px-4 py-2 text-sm" data-field="position" data-row="${originalRowIndex}"><span class="bg-gray-100 px-2 py-1 rounded text-xs font-bold text-gray-600">${escapeHtml(record[7])}</span></td>
+          <td class="px-4 py-2 text-sm font-mono text-green-600" data-field="salary" data-row="${originalRowIndex}">₱${Number(record[8] || 0).toLocaleString()}</td>
+          <td class="px-4 py-2 text-sm text-blue-500 underline" data-field="email" data-row="${originalRowIndex}">${escapeHtml((record[9] || '').toLowerCase())}</td>
+          <td class="px-4 py-2 text-xs text-gray-600">${escapeHtml(trainingDates)}</td>
+          <td class="px-4 py-2 text-xs text-gray-600">${escapeHtml(startStr)} - ${escapeHtml(endStr)}</td>
+        `;
+      }
+      
+      function showNotification(message, type = 'info', duration = 4000) {
+        const toast = document.createElement('div');
+        
+        // Map type to toast class and icon
+        const typeConfig = {
+          success: { class: 'toast-success', icon: 'check-circle' },
+          error: { class: 'toast-error', icon: 'exclamation-circle' },
+          warning: { class: 'toast-warning', icon: 'exclamation-triangle' },
+          info: { class: 'toast-info', icon: 'info-circle' }
+        };
+        
+        const config = typeConfig[type] || typeConfig.info;
+        
+        toast.className = `toast ${config.class}`;
+        toast.innerHTML = `
+          <i class="fas fa-${config.icon} toast-icon"></i>
+          <span class="toast-message">${escapeHtml(message)}</span>
+          <button class="toast-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Auto-dismiss after duration
+        const dismissTimeout = setTimeout(() => {
+          dismissToast(toast);
+        }, duration);
+        
+        // Remove from timeout list when manually closed
+        toast.addEventListener('click', (e) => {
+          if (e.target.closest('.toast-close')) {
+            clearTimeout(dismissTimeout);
+          }
+        });
+        
+        return toast;
+      }
+      
+      function dismissToast(toastElement) {
+        if (!toastElement || !document.body.contains(toastElement)) return;
+        toastElement.classList.add('exit');
+        setTimeout(() => {
+          if (document.body.contains(toastElement)) {
+            toastElement.remove();
+          }
+        }, 300);
+      }
+      
+      function showSkeletonLoader(containerId, rowCount = 5) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        let skeletonHTML = '';
+        for (let i = 0; i < rowCount; i++) {
+          skeletonHTML += `
+            <div class="skeleton-table-row">
+              <div class="skeleton skeleton-table-cell" style="flex: 0 0 10%;"></div>
+              <div class="skeleton skeleton-table-cell" style="flex: 0 0 15%;"></div>
+              <div class="skeleton skeleton-table-cell" style="flex: 0 0 20%;"></div>
+              <div class="skeleton skeleton-table-cell" style="flex: 0 0 15%;"></div>
+              <div class="skeleton skeleton-table-cell" style="flex: 0 0 12%;"></div>
+              <div class="skeleton skeleton-table-cell" style="flex: 0 0 10%;"></div>
+              <div class="skeleton skeleton-table-cell" style="flex: 0 0 18%;"></div>
+            </div>
+          `;
+        }
+        container.innerHTML = skeletonHTML;
+      }
+      
+      function hideSkeletonLoader(containerId) {
+        const container = document.getElementById(containerId);
+        if (container) {
+          container.innerHTML = '';
+        }
+      }
+      
+      function editRecord(rowIndex) {
+        const allRecordsForEdit = StateManager.getState('records.all');
+        const record = allRecordsForEdit[rowIndex];
+        if (!record) {
+          console.error('Record not found at index:', rowIndex);
+          showNotification('Record not found', 'error');
+          return;
+        }
+
+        editingRecordId = record[16]; // Store the # column value (Column P)
+        
+        // Hide bulk entry controls when editing
+        document.getElementById('bulkEntryControls').classList.add('hidden');
+        
+        // Populate form with record data
+        document.querySelector('[name="projName"]').value = record[10] || '';
+        document.querySelector('[name="startDate"]').value = record[11] ? record[11].split('T')[0] : '';
+        document.querySelector('[name="endDate"]').value = record[12] ? record[12].split('T')[0] : '';
+        document.querySelector('[name="trainingStartDate"]').value = record[14] ? record[14].split('T')[0] : '';
+        document.querySelector('[name="trainingEndDate"]').value = record[15] ? record[15].split('T')[0] : '';
+        
+        // Clear and populate personnel rows
+        const tbody = document.getElementById('entryRowsTest');
+        tbody.innerHTML = '';
+        
+        const tr = document.createElement('tr');
+        tr.className = "border-b border-gray-50 entry-row";
+        
+        const optionsHtml = dynamicPositions.map(pos => 
+          `<option value="${escapeAttribute(pos)}" ${pos === record[7] ? 'selected' : ''}>${escapeHtml(pos)}</option>`
+        ).join('');
+
+        tr.innerHTML = `
+          <td class="py-3 pr-3">
+            <div class="flex gap-2 items-center">
+                <div class="relative flex-1">
+                    <input type="text" name="firstname" placeholder="Firstname" value="${escapeAttribute(record[3] || '')}" class="p-3 text-sm input-modern rounded-lg w-full" aria-label="Firstname">
+                </div>
+                <div class="relative flex-1">
+                    <input type="text" name="middlename" placeholder="Middlename" value="${escapeAttribute(record[4] || '')}" class="p-3 text-sm input-modern rounded-lg w-full" aria-label="Middlename">
+                </div>
+                <div class="relative flex-1">
+                    <input type="text" name="lastname" placeholder="Lastname" value="${escapeAttribute(record[2] || '')}" class="p-3 text-sm input-modern rounded-lg w-full" aria-label="Lastname">
+                </div>
+                <div class="relative w-20">
+                    <input type="text" name="suffix" placeholder="Suffix" value="${escapeAttribute(record[5] || '')}" class="p-3 text-sm input-modern rounded-lg w-full text-center" aria-label="Suffix">
+                </div>
+            </div>
+          </td>
+          <td class="py-3 px-2 w-32">
+            <select name="gender" class="p-3 text-sm input-modern rounded-lg w-full" aria-label="Select gender">
+              <option value="">Select...</option>
+              <option ${record[6] === 'Male' ? 'selected' : ''}>Male</option>
+              <option ${record[6] === 'Female' ? 'selected' : ''}>Female</option>
+            </select>
+          </td>
+          <td class="py-3 px-2 w-56">
+            <select name="position" class="p-3 text-sm input-modern rounded-lg w-full" aria-label="Select position">
+              <option value="">Select...</option>
+              ${optionsHtml}
+            </select>
+          </td>
+          <td class="py-3 px-2 w-40">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-peso-sign text-gray-600 text-sm"></i>
+                </div>
+                <input type="number" name="salary" placeholder="0.00" value="${escapeAttribute(record[8] || '')}" class="p-3 pl-8 text-sm input-modern rounded-lg w-full text-right" aria-label="Salary">
+            </div>
+          </td>
+          <td class="py-3 px-2">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-envelope text-gray-600 text-sm"></i>
+                </div>
+                <input type="email" name="email" placeholder="email@example.com" value="${escapeAttribute(record[9] || '')}" class="p-3 pl-10 text-sm input-modern rounded-lg w-full" aria-label="Email address">
+            </div>
+          </td>
+          <td class="py-3 pl-2 text-center w-16 removeRowContainer">
+            <button onclick="this.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all text-lg" aria-label="Remove row" type="button">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+        
+        // Hide the remove button when editing
+        tbody.querySelector('.removeRowContainer').classList.add('hidden');
+        
+        // Add real-time validation to edit mode fields
+        tr.querySelectorAll('input, select').forEach(field => {
+          field.addEventListener('blur', () => validateField(field));
+          field.addEventListener('input', () => {
+            // Convert name fields to uppercase as user types
+            if (field.dataset.subfield === 'firstName' || 
+                field.dataset.subfield === 'lastName' || 
+                field.dataset.subfield === 'project') {
+              field.value = field.value.toUpperCase();
+            }
+            // Convert email to lowercase as user types
+            if (field.dataset.subfield === 'email') {
+              field.value = field.value.toLowerCase();
+            }
+            // Clear error styling on input
+            field.classList.remove('border-red-500', 'bg-red-50');
+          });
+        });
+        
+        // Update submit button text and close modal
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerText = 'Update Record';
+        closeModal('tableModal');
+        openModal('formModal');
+      }
+
+      function loadSettings() {
+        google.script.run
+          .withSuccessHandler(function(positions) {
+            dynamicPositions = positions;
+          }).getPositions();
+      }
+
+function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        const progressDiv = document.getElementById('tableProgress');
+        tbody.innerHTML = '';
+        
+        const filteredRecordsForRender = StateManager.getState('records.filtered');
+        if (!filteredRecordsForRender || filteredRecordsForRender.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="12" class="p-10 text-center">No records found.</td></tr>';
+          updateControls(0);
+          return;
+        }
+
+        // Calculate start and end indices
+        const currentPageForRender = StateManager.getState('records.currentPage');
+        const start = (currentPageForRender - 1) * recordsPerPage;
+        const end = start + recordsPerPage;
+        const paginatedItems = filteredRecordsForRender.slice(start, end);
+
+        // Progressive loading
+        let loadedCount = 0;
+        const totalToLoad = paginatedItems.length;
+        
+        function loadBatch() {
+          const batchEnd = Math.min(loadedCount + BATCH_SIZE, totalToLoad);
+          
+          for (let i = loadedCount; i < batchEnd; i++) {
+            const row = paginatedItems[i];
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-blue-50 transition-colors border-b border-gray-50";
+            
+            // Formatting dates safely
+            const startStr = row[11] || '-';
+            const endStr = row[12] || '-';
+            const trainingStartStr = row[14] || '-';
+            const trainingEndStr = row[15] || '-';
+            const trainingDates = (trainingStartStr && trainingEndStr && trainingStartStr !== '-' && trainingEndStr !== '-') ? `${trainingStartStr} - ${trainingEndStr}` : '-';
+
+            tr.innerHTML = `
+              <td class="px-4 py-2 text-center">
+                <button onclick="toggleInlineEdit(${row[0] - 1})" class="text-blue-600 hover:text-blue-800 font-semibold text-sm bg-blue-50 px-3 py-1 rounded hover:bg-blue-100 transition-all">
+                  <i class="fas fa-edit"></i> Edit
+                </button>
+              </td>
+              <td class="px-4 py-2 text-sm text-gray-600 font-mono">${escapeHtml(row[13] || '-')}</td>
+              <td class="px-4 py-2 text-sm text-gray-600" style="display:none;">${escapeHtml(row[13])}</td>
+              <td class="px-4 py-2 text-sm">
+                  <div class="font-medium text-gray-900" data-field="name" data-row="${row[0] - 1}">${escapeHtml((row[3] || '').toUpperCase())}${row[4] ? ' ' + escapeHtml((row[4][0] || '').toUpperCase()) + '.' : ''} ${escapeHtml((row[2] || '').toUpperCase())}${row[5] ? ' ' + escapeHtml((row[5] || '').toUpperCase()) : ''}</div>
+              </td>
+              <td class="px-4 py-2 text-sm font-bold text-gray-700" data-field="project" data-row="${row[0] - 1}">${escapeHtml((row[10] || '-').toUpperCase())}</td>
+              <td class="px-4 py-2 text-sm text-gray-600" data-field="gender" data-row="${row[0] - 1}">${escapeHtml(row[6])}</td>
+              <td class="px-4 py-2 text-sm" data-field="position" data-row="${row[0] - 1}"><span class="bg-gray-100 px-2 py-1 rounded text-xs font-bold text-gray-600">${escapeHtml(row[7])}</span></td>
+              <td class="px-4 py-2 text-sm font-mono text-green-600" data-field="salary" data-row="${row[0] - 1}">₱${Number(row[8] || 0).toLocaleString()}</td>
+              <td class="px-4 py-2 text-sm text-blue-500 underline" data-field="email" data-row="${row[0] - 1}">${escapeHtml((row[9] || '').toLowerCase())}</td>
+              <td class="px-4 py-2 text-xs text-gray-600">${escapeHtml(trainingDates)}</td>
+              <td class="px-4 py-2 text-xs text-gray-600">${escapeHtml(startStr)} - ${escapeHtml(endStr)}</td>
+            `;
+            tbody.appendChild(tr);
+          }
+          
+          loadedCount = batchEnd;
+          
+          // Update progress
+          if (loadedCount < totalToLoad) {
+            progressDiv.textContent = `Loading ${loadedCount} of ${totalToLoad} rows...`;
+            progressDiv.classList.remove('hidden');
+            setTimeout(loadBatch, 50); // Small delay for UI responsiveness
+          } else {
+            progressDiv.classList.add('hidden');
+            updateControls(filteredRecordsForRender.length);
+          }
+        }
+        
+        // Start loading
+        loadBatch();
+      }
+
+      function changePage(step) {
+        const filteredRecordsForPage = StateManager.getState('records.filtered');
+        const totalPages = Math.ceil(filteredRecordsForPage.length / recordsPerPage);
+        const currentPageForPage = StateManager.getState('records.currentPage');
+        const newPage = currentPageForPage + step;
+        
+        if (newPage >= 1 && newPage <= totalPages) {
+          StateManager.updateState('records.currentPage', newPage);
+          renderTable();
+        }
+      }
+
+      function updateControls(totalItems) {
+        const totalPages = Math.ceil(totalItems / recordsPerPage) || 1;
+        const currentPageForControls = StateManager.getState('records.currentPage');
+        document.getElementById('pageInfo').innerText = `Page ${currentPageForControls} of ${totalPages} (${totalItems} total records)`;
+        
+        document.getElementById('prevBtn').disabled = (currentPageForControls === 1);
+        document.getElementById('nextBtn').disabled = (currentPageForControls === totalPages);
+      }
+
+      // New helper function to handle the quantity input
+      function handleMultipleRows() {
+        const countInput = document.getElementById('rowCount');
+        const count = Number.parseInt(countInput.value) || 1; // Default to 1 if empty/invalid
+        
+        for (let i = 0; i < count; i++) {
+          addNewEntryRows(i === count - 1); // Only scroll on the very last row added
+        }
+        
+        // Reset input back to 1 after adding
+        countInput.value = 1;
+      }
+
+      // Modified addNewEntryRows to accept a "shouldScroll" parameter
+      function addNewEntryRows(shouldScroll = true) {
+        const tbody = document.getElementById('entryRowsTest');
+        const container = document.getElementById('entryContainer');
+        const tr = document.createElement('tr');
+        tr.className = "border-b border-gray-50 entry-row";
+
+        const optionsHtml = dynamicPositions.map(pos => 
+          `<option value="${escapeAttribute(pos)}">${escapeHtml(pos)}</option>`
+        ).join('');
+
+        tr.innerHTML = `
+          <td class="py-2 pr-2">
+            <div class="flex gap-1 items-center">
+                <div class="relative flex-1">
+                    <input type="text" name="firstname" placeholder="Firstname" class="p-2 text-xs input-modern rounded w-full" aria-label="Firstname">
+                </div>
+                <div class="relative flex-1">
+                    <input type="text" name="middlename" placeholder="Middlename" class="p-2 text-xs input-modern rounded w-full" aria-label="Middlename">
+                </div>
+                <div class="relative flex-1">
+                    <input type="text" name="lastname" placeholder="Lastname" class="p-2 text-xs input-modern rounded w-full" aria-label="Lastname">
+                </div>
+                <div class="relative w-12">
+                    <input type="text" name="suffix" placeholder="Suffix" class="p-2 text-xs input-modern rounded w-full text-center" aria-label="Suffix">
+                </div>
+            </div>
+          </td>
+          <td class="py-2 px-1 w-24">
+            <select name="gender" class="p-2 text-xs input-modern rounded w-full" aria-label="Select gender">
+              <option value="">Select...</option>
+              <option>Male</option>
+              <option>Female</option>
+            </select>
+          </td>
+          <td class="py-2 px-1 w-48">
+            <select name="position" class="p-2 text-xs input-modern rounded w-full" aria-label="Select position">
+              <option value="">Select...</option>
+              ${optionsHtml}
+            </select>
+          </td>
+          <td class="py-2 px-1 w-32">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                    <i class="fas fa-peso-sign text-gray-600 text-xs"></i>
+                </div>
+                <input type="number" name="salary" placeholder="0.00" class="p-2 pl-6 text-xs input-modern rounded w-full text-right" aria-label="Salary">
+            </div>
+          </td>
+          <td class="py-2 px-1">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                    <i class="fas fa-envelope text-gray-600 text-xs"></i>
+                </div>
+                <input type="email" name="email" placeholder="email@example.com" class="p-2 pl-8 text-xs input-modern rounded w-full" aria-label="Email address">
+            </div>
+          </td>
+          <td class="py-2 pl-1 text-center w-12 removeRowContainer">
+            <button onclick="this.parentElement.parentElement.remove()" class="text-red-400 hover:text-red-600 hover:bg-red-50 p-1 rounded transition-all text-sm" aria-label="Remove row" type="button">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        // Add real-time validation to new row fields
+        tr.querySelectorAll('input, select').forEach(field => {
+          field.addEventListener('blur', () => validateField(field));
+          field.addEventListener('input', () => {
+            // Convert name fields to uppercase as user types
+            if (field.name === 'firstname' || field.name === 'lastname' || field.name === 'middlename' || field.name === 'suffix') {
+              field.value = field.value.toUpperCase();
+            }
+            // Convert email to lowercase as user types
+            if (field.name === 'email') {
+              field.value = field.value.toLowerCase();
+            }
+            // Clear error styling on input
+            field.classList.remove('border-red-500', 'bg-red-50');
+          });
+        });
+
+        if (shouldScroll) {
+          requestAnimationFrame(() => {
+            container.scrollTo({
+              top: container.scrollHeight,
+              behavior: 'smooth'
+            });
+            tr.querySelector('input[name="firstname"]').focus();
+          });
+        }
+      }
+
+      function validateField(field) {
+        const value = field.value.trim();
+        let isValid = true;
+        
+        switch(field.name) {
+          case 'email':
+            isValid = value === '' || (value.includes('@') && value.includes('.'));
+            break;
+          case 'salary':
+            isValid = value === '' || (!Number.isNaN(value) && Number.parseFloat(value) > 0);
+            break;
+          case 'firstname':
+          case 'lastname':
+            isValid = value !== '' || field.parentElement.parentElement.querySelector('input[name="firstname"]').value.trim() !== '' || field.parentElement.parentElement.querySelector('input[name="lastname"]').value.trim() !== '';
+            break;
+          case 'gender':
+            isValid = value !== '';
+            break;
+          case 'position':
+            isValid = value !== '';
+            break;
+        }
+        
+        if (!isValid && value !== '') {
+          field.classList.add('border-red-500', 'bg-red-50');
+        } else {
+          field.classList.remove('border-red-500', 'bg-red-50');
+        }
+      }
+
+      function highlightInvalidFields(row, errors) {
+        // Clear previous highlights
+        row.querySelectorAll('input, select').forEach(field => {
+          field.classList.remove('border-red-500', 'bg-red-50', 'border-green-500', 'bg-green-50');
+        });
+        
+        // Add highlights for invalid fields
+        if (errors.some(e => e.includes("Name"))) {
+          row.querySelector('[name="firstname"]').classList.add('border-red-500', 'bg-red-50');
+          row.querySelector('[name="lastname"]').classList.add('border-red-500', 'bg-red-50');
+        }
+        
+        if (errors.some(e => e.includes("Position"))) {
+          row.querySelector('[name="position"]').classList.add('border-red-500', 'bg-red-50');
+        }
+        
+        if (errors.some(e => e.includes("Salary"))) {
+          row.querySelector('[name="salary"]').classList.add('border-red-500', 'bg-red-50');
+        }
+        
+        if (errors.some(e => e.includes("Email"))) {
+          row.querySelector('[name="email"]').classList.add('border-red-500', 'bg-red-50');
+        }
+        
+        if (errors.some(e => e.includes("Gender"))) {
+          row.querySelector('[name="gender"]').classList.add('border-red-500', 'bg-red-50');
+        }
+      }
+
+      function validateRow(row, index) {
+        const errors = [];
+        
+        const lastName = row.querySelector('[name="lastname"]').value.trim();
+        const firstName = row.querySelector('[name="firstname"]').value.trim();
+        const gender = row.querySelector('[name="gender"]').value.trim();
+        const position = row.querySelector('[name="position"]').value.trim();
+        const salary = row.querySelector('[name="salary"]').value.trim();
+        const email = row.querySelector('[name="email"]').value.trim();
+        
+        if (!lastName && !firstName) {
+          errors.push("First Name or Last Name is required");
+        }
+        
+        if (!gender) {
+          errors.push("Gender is required");
+        }
+        
+        if (!position) {
+          errors.push("Position is required");
+        }
+        
+        if (!salary || Number.isNaN(salary) || Number.parseFloat(salary) <= 0) {
+          errors.push("Valid Salary is required");
+        }
+        
+        if (!email || !email.includes('@') || !email.includes('.')) {
+          errors.push("Valid Email is required");
+        }
+        
+        // Highlight invalid fields if there are errors
+        if (errors.length > 0) {
+          highlightInvalidFields(row, errors);
+        } else {
+          // Clear highlights for valid rows
+          row.querySelectorAll('input, select').forEach(field => {
+            field.classList.remove('border-red-500', 'bg-red-50');
+          });
+        }
+        
+        return {
+          isValid: errors.length === 0,
+          errors: errors,
+          rowNumber: index + 1
+        };
+      }
+
+      // ===== MODULARIZED SUBMIT FUNCTIONALITY =====
+      
+      class FormSubmissionManager {
+        constructor() {
+          this.btn = document.getElementById('submitBtn');
+        }
+        
+        async submitAllEntries() {
+          try {
+            const formData = this.extractFormData();
+            const validation = this.validateFormData(formData);
+            
+            if (!validation.isValid) {
+              this.handleValidationErrors(validation.errors);
+              logActivity('FORM_SUBMISSION_FAILED', `Validation errors: ${validation.errors.length}`, 'error');
+              return;
+            }
+            
+            this.setLoadingState(true);
+            logActivity('FORM_SUBMISSION_START', `Project: ${formData.projName}, Personnel: ${formData.rows.length}`);
+            
+            if (StateManager.getState('editing.isEditMode')) {
+              await this.handleEditSubmission(formData);
+            } else {
+              await this.handleNewSubmission(formData);
+            }
+            
+          } catch (error) {
+            console.error('❌ Submission failed:', error);
+            logActivity('FORM_SUBMISSION_ERROR', error.message, 'error');
+            showNotification(apiClient.getErrorMessage(error), 'error');
+          } finally {
+            this.setLoadingState(false);
+          }
+        }
+        
+        extractFormData() {
+          const rows = document.querySelectorAll('.entry-row');
+          const projName = document.querySelector('[name="projName"]').value.toUpperCase();
+          const startDate = document.querySelector('[name="startDate"]').value;
+          const endDate = document.querySelector('[name="endDate"]').value;
+          const trainingStartDate = document.querySelector('[name="trainingStartDate"]').value;
+          const trainingEndDate = document.querySelector('[name="trainingEndDate"]').value;
+          
+          return {
+            rows: Array.from(rows),
+            projName,
+            startDate,
+            endDate,
+            trainingStartDate,
+            trainingEndDate,
+            formattedDates: {
+              start: formatDateToDisplay(startDate),
+              end: formatDateToDisplay(endDate),
+              trainingStart: formatDateToDisplay(trainingStartDate),
+              trainingEnd: formatDateToDisplay(trainingEndDate)
+            }
+          };
+        }
+        
+        validateFormData(formData) {
+          const errors = [];
+          
+          // Use schema-based validation for project info
+          const projectValidation = SchemaValidator.validateProjectInfo(formData);
+          errors.push(...projectValidation.errors);
+          
+          // Personnel validation using schema
+          if (formData.rows.length === 0) {
+            errors.push("Please add at least one person");
+          } else {
+            const validationResults = formData.rows.map((row, index) => SchemaValidator.validateRow(row, index));
+            const invalidRows = validationResults.filter(result => !result.isValid);
+            
+            if (invalidRows.length > 0) {
+              invalidRows.forEach(row => {
+                row.errors.forEach(error => {
+                  errors.push(`Row ${row.rowNumber}: ${error}`);
+                });
+              });
+            }
+            
+            formData.validRows = formData.rows.filter((row, index) => validationResults[index].isValid);
+          }
+          
+          return {
+            isValid: errors.length === 0,
+            errors: errors,
+            formData: formData
+          };
+        }
+        
+        handleValidationErrors(errors) {
+          const formattedErrors = this.formatValidationErrors(errors);
+          const title = errors.length === 1 ? "Validation Error" : "Validation Errors";
+          this.showValidationAlert(formattedErrors, title);
+        }
+        
+        formatValidationErrors(errors) {
+          const errorGroups = {
+            project: [],
+            personnel: [],
+            dates: []
+          };
+          
+          // Group errors by type with better categorization
+          errors.forEach(error => {
+            if (error.includes('Project Name')) {
+              errorGroups.project.push(error);
+            } else if (error.includes('Start Date') || error.includes('End Date') || error.includes('date')) {
+              errorGroups.dates.push(error);
+            } else if (error.includes('Row') || error.includes('Name') || error.includes('Gender') || 
+                       error.includes('Position') || error.includes('Salary') || error.includes('Email')) {
+              errorGroups.personnel.push(error);
+            } else {
+              // Fallback to project for uncategorized errors
+              errorGroups.project.push(error);
+            }
+          });
+          
+          let html = '<div class="validation-error-container compact">';
+          
+          // Project errors
+          if (errorGroups.project.length > 0) {
+            html += '<div class="error-section compact">';
+            html += '<h4 class="error-section-title compact">📋 Project</h4>';
+            html += '<div class="error-list compact">';
+            errorGroups.project.forEach(error => {
+              html += `<div class="error-item compact">${this.escapeHtml(error)}</div>`;
+            });
+            html += '</div></div>';
+          }
+          
+          // Date errors
+          if (errorGroups.dates.length > 0) {
+            html += '<div class="error-section compact">';
+            html += '<h4 class="error-section-title compact">📅 Dates</h4>';
+            html += '<div class="error-list compact">';
+            errorGroups.dates.forEach(error => {
+              html += `<div class="error-item compact">${this.escapeHtml(error)}</div>`;
+            });
+            html += '</div></div>';
+          }
+          
+          // Personnel errors - group by row for compactness
+          if (errorGroups.personnel.length > 0) {
+            html += '<div class="error-section compact">';
+            html += '<h4 class="error-section-title compact">👤 Personnel</h4>';
+            html += '<div class="error-list compact">';
+            
+            // Group personnel errors by row
+            const rowErrors = {};
+            errorGroups.personnel.forEach(error => {
+              const rowMatch = error.match(/Row (\d+):/);
+              if (rowMatch) {
+                const rowNum = rowMatch[1];
+                if (!rowErrors[rowNum]) rowErrors[rowNum] = [];
+                rowErrors[rowNum].push(error.replace(`Row ${rowNum}: `, ''));
+              }
+            });
+            
+            // Display grouped row errors
+            Object.keys(rowErrors).forEach(rowNum => {
+              html += `<div class="row-error-group compact">`;
+              html += `<div class="row-header compact">Row ${rowNum}:</div>`;
+              html += `<div class="row-errors compact">${rowErrors[rowNum].join(', ')}</div>`;
+              html += `</div>`;
+            });
+            
+            html += '</div></div>';
+          }
+          
+          html += '</div>';
+          return html;
+        }
+        
+        escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+        }
+        
+        async showValidationAlert(htmlContent, title) {
+          const modal = document.getElementById('custom-alert');
+          const msgElem = document.getElementById('alert-message');
+          const titleElem = document.getElementById('alert-title');
+          const closeBtn = document.getElementById('alert-close');
+          const modalContent = modal.querySelector('.glass-effect');
+
+          // Adjust modal for validation errors
+          modalContent.classList.add('validation-modal');
+          modalContent.classList.remove('max-w-md');
+          modalContent.classList.add('max-w-2xl');
+
+          // Set the content with HTML
+          msgElem.innerHTML = htmlContent;
+          titleElem.textContent = title;
+
+          // Add validation error styles
+          this.addValidationStyles();
+
+          // Update icon for validation errors
+          const iconContainer = modal.querySelector('.bg-gradient-to-br');
+          iconContainer.className = 'bg-gradient-to-br from-red-400 to-red-600 p-3 rounded-full mr-4 shadow-lg';
+          const icon = iconContainer.querySelector('i');
+          icon.className = 'fas fa-exclamation-circle text-white text-xl';
+
+          // Show the modal
+          modal.classList.remove('hidden');
+
+          return new Promise((resolve) => {
+            closeBtn.onclick = () => {
+              modal.classList.add('hidden');
+              // Reset modal styling
+              modalContent.classList.remove('validation-modal', 'max-w-2xl');
+              modalContent.classList.add('max-w-md');
+              resolve(true);
+            };
+          });
+        }
+        
+        addValidationStyles() {
+          if (document.getElementById('validation-error-styles')) return;
+          
+          const styles = document.createElement('style');
+          styles.id = 'validation-error-styles';
+          styles.textContent = `
+            .validation-modal #alert-message {
+              text-align: left !important;
+              line-height: 1.4 !important;
+            }
+            
+            .validation-error-container {
+              max-height: 400px;
+              overflow-y: auto;
+              padding-right: 8px;
+            }
+            
+            .validation-error-container.compact {
+              max-height: 300px;
+            }
+            
+            .error-section {
+              margin-bottom: 20px;
+            }
+            
+            .error-section.compact {
+              margin-bottom: 12px;
+            }
+            
+            .error-section-title {
+              color: #dc2626;
+              font-size: 14px;
+              font-weight: 600;
+              margin-bottom: 8px;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+            }
+            
+            .error-section-title.compact {
+              font-size: 12px;
+              margin-bottom: 4px;
+            }
+            
+            .error-list {
+              margin: 0;
+              padding-left: 0;
+              list-style-type: none;
+            }
+            
+            .error-item {
+              color: #1f2937;
+              font-size: 13px;
+              line-height: 1.4;
+              margin-bottom: 6px;
+              padding: 8px 12px;
+              border-radius: 4px;
+              border-left: 3px solid #dc2626;
+              background-color: #fee2e2;
+              position: relative;
+            }
+            
+            .error-item.compact {
+              font-size: 11px;
+              margin-bottom: 3px;
+              padding: 4px 8px;
+              line-height: 1.3;
+            }
+            
+            .error-item:before {
+              content: "•";
+              color: #dc2626;
+              font-weight: bold;
+              margin-right: 8px;
+            }
+            
+            .row-error-group {
+              margin-bottom: 6px;
+            }
+            
+            .row-error-group.compact {
+              margin-bottom: 4px;
+            }
+            
+            .row-header {
+              color: #dc2626;
+              font-weight: 600;
+              font-size: 12px;
+              margin-bottom: 2px;
+            }
+            
+            .row-header.compact {
+              font-size: 11px;
+              margin-bottom: 1px;
+            }
+            
+            .row-errors {
+              color: #1f2937;
+              font-size: 11px;
+              line-height: 1.3;
+              padding-left: 12px;
+            }
+            
+            .row-errors.compact {
+              font-size: 10px;
+              line-height: 1.2;
+              padding-left: 10px;
+            }
+            
+            /* Custom scrollbar for validation container */
+            .validation-error-container::-webkit-scrollbar {
+              width: 6px;
+            }
+            
+            .validation-error-container::-webkit-scrollbar-track {
+              background: #f1f5f9;
+              border-radius: 3px;
+            }
+            
+            .validation-error-container::-webkit-scrollbar-thumb {
+              background: #94a3b8;
+              border-radius: 3px;
+            }
+            
+            .validation-error-container::-webkit-scrollbar-thumb:hover {
+              background: #64748b;
+            }
+          `;
+          document.head.appendChild(styles);
+        }
+        
+        setLoadingState(loading) {
+          this.btn.disabled = loading;
+          this.btn.innerText = loading ? "Processing..." : "Save All Records";
+        }
+        
+        async handleEditSubmission(formData) {
+          const row = formData.rows[0];
+          if (!row) {
+            throw new Error("No personnel row found for editing");
+          }
+          
+          const recordData = this.extractRowData(row);
+          const editingRecordId = StateManager.getState('editing.recordId');
+          
+          // Get original record data
+          const originalRecord = StateManager.getState('records.all').find(r => r[16] === editingRecordId);
+          const payload = this.createEditPayload(recordData, formData, originalRecord);
+          
+          await apiClient.call('updateRecordById', editingRecordId, payload[0]);
+          logActivity('RECORD_EDIT', `Updated record ID: ${editingRecordId}, Project: ${formData.projName}`);
+          
+          this.handleSuccess("Record updated successfully!");
+        }
+        
+        async handleNewSubmission(formData) {
+          const recordInfo = await apiClient.call('getProjectRecordInfo', formData.projName);
+          const payload = this.createBulkPayload(formData, recordInfo);
+          
+          await apiClient.call('submitBulkData', payload);
+          logActivity('BULK_RECORDS_ADDED', `Added ${payload.length} personnel for project: ${formData.projName}`);
+          
+          this.handleSuccess(`Successfully saved ${payload.length} records!`);
+          await this.refreshProjectList();
+        }
+        
+        extractRowData(row) {
+          return {
+            lastname: row.querySelector('[name="lastname"]').value.toUpperCase(),
+            firstname: row.querySelector('[name="firstname"]').value.toUpperCase(),
+            middlename: row.querySelector('[name="middlename"]').value.toUpperCase(),
+            suffix: row.querySelector('[name="suffix"]').value.toUpperCase(),
+            gender: row.querySelector('[name="gender"]').value,
+            position: row.querySelector('[name="position"]').value,
+            salary: row.querySelector('[name="salary"]').value,
+            email: row.querySelector('[name="email"]').value.toLowerCase()
+          };
+        }
+        
+        createEditPayload(recordData, formData, originalRecord) {
+          return [[
+            originalRecord ? originalRecord[1] : new Date().toISOString(), // Keep original date
+            recordData.lastname,
+            recordData.firstname,
+            recordData.middlename,
+            recordData.suffix,
+            recordData.gender,
+            recordData.position,
+            recordData.salary,
+            recordData.email,
+            formData.projName,
+            formData.formattedDates.start,
+            formData.formattedDates.end,
+            originalRecord ? originalRecord[13] : '', // Keep original ref number
+            formData.formattedDates.trainingStart,
+            formData.formattedDates.trainingEnd,
+            StateManager.getState('editing.recordId') // Keep record ID
+          ]];
+        }
+        
+        createBulkPayload(formData, recordInfo) {
+          const payload = [];
+          const currentYear = new Date().getFullYear();
+          const totalEntries = formData.validRows.length;
+          
+          formData.validRows.forEach((row, index) => {
+            const recordData = this.extractRowData(row);
+            const recordNumber = this.generateRecordNumber(
+              recordInfo, currentYear, totalEntries, index
+            );
+            
+            payload.push([
+              new Date().toISOString(),
+              recordData.lastname,
+              recordData.firstname,
+              recordData.middlename,
+              recordData.suffix,
+              recordData.gender,
+              recordData.position,
+              recordData.salary,
+              recordData.email,
+              formData.projName,
+              formData.formattedDates.start,
+              formData.formattedDates.end,
+              recordNumber,
+              formData.formattedDates.trainingStart,
+              formData.formattedDates.trainingEnd
+            ]);
+          });
+          
+          return payload;
+        }
+        
+        generateRecordNumber(recordInfo, currentYear, totalEntries, index) {
+          if (totalEntries === 1) {
+            return this.generateSingleEntryRecordNumber(recordInfo, currentYear);
+          } else {
+            return this.generateMultipleEntryRecordNumber(recordInfo, currentYear, index);
+          }
+        }
+        
+        generateSingleEntryRecordNumber(recordInfo, currentYear) {
+          if (!recordInfo.projectExists) {
+            return `${currentYear}-${recordInfo.base}`;
+          }
+          
+          if (recordInfo.lastRecordNumber && !recordInfo.lastRecordNumber.includes('(')) {
+            return `${currentYear}-${recordInfo.base}(2)`;
+          } else {
+            return `${currentYear}-${recordInfo.base}(${recordInfo.nextCount})`;
+          }
+        }
+        
+        generateMultipleEntryRecordNumber(recordInfo, currentYear, index) {
+          if (!recordInfo.projectExists) {
+            const sequenceNum = index + 1;
+            return `${currentYear}-${recordInfo.base}(${sequenceNum})`;
+          }
+          
+          if (recordInfo.lastRecordNumber && !recordInfo.lastRecordNumber.includes('(')) {
+            const sequenceNum = index + 2;
+            return `${currentYear}-${recordInfo.base}(${sequenceNum})`;
+          } else {
+            const sequenceNum = recordInfo.nextCount + index;
+            return `${currentYear}-${recordInfo.base}(${sequenceNum})`;
+          }
+        }
+        
+        handleSuccess(message) {
+          // Show immediate UI feedback
+          scheduleUIUpdate(() => {
+            closeModal('formModal');
+            clearForm();
+            showNotification(message, 'success');
+          });
+          
+          // Refresh data in background without blocking UI
+          Promise.all([
+            loadDashboardStats(),
+            this.refreshTableData()
+          ]).catch(error => {
+            console.error('Error refreshing data:', error);
+            showNotification('Data refresh failed. Please refresh the page.', 'warning');
+          });
+        }
+        
+        async refreshTableData() {
+          try {
+            // Refresh the global table data
+            const data = await apiClient.call('getData');
+            
+            // Update state with fresh data
+            StateManager.updateState('records.all', (data || []).map((row, index) => [index + 1, ...row]));
+            StateManager.updateState('records.filtered', StateManager.getState('records.all'));
+            StateManager.updateState('records.currentPage', 1);
+            
+            // If table modal is currently open, re-render it
+            const tableModal = document.getElementById('tableModal');
+            if (!tableModal.classList.contains('hidden')) {
+              renderTable();
+            }
+            
+          } catch (error) {
+            console.error('❌ Failed to refresh table data:', error);
+            showNotification('Failed to refresh table data. Please refresh the page.', 'error');
+          }
+        }
+        
+        async refreshProjectList() {
+          try {
+            const projects = await apiClient.call('getProjectList');
+            const datalist = document.getElementById('projectList');
+            datalist.innerHTML = '';
+            projects.forEach(p => {
+              const opt = document.createElement('option');
+              opt.value = p;
+              datalist.appendChild(opt);
+            });
+          } catch (error) {
+            console.error('Failed to refresh project list:', error);
+          }
+        }
+      }
+      
+      // Initialize form submission manager
+      const formSubmissionManager = new FormSubmissionManager();
+      
+      // Backward compatibility wrapper
+      function submitAllEntries() {
+        return formSubmissionManager.submitAllEntries();
+      }
+      
+      // ===== SCHEMA-BASED VALIDATION SYSTEM =====
+      
+      class ValidationSchema {
+        static PERSONNEL_RECORD = {
+          firstName: {
+            type: 'string',
+            minLength: 1,
+            required: true,
+            message: 'First Name is required'
+          },
+          lastName: {
+            type: 'string',
+            minLength: 1,
+            required: true,
+            message: 'Last Name is required'
+          },
+          middleName: {
+            type: 'string',
+            required: false,
+            allowEmpty: true
+          },
+          suffix: {
+            type: 'string',
+            required: false,
+            allowEmpty: true
+          },
+          gender: {
+            type: 'string',
+            required: true,
+            enum: ['Male', 'Female'],
+            message: 'Gender is required'
+          },
+          position: {
+            type: 'string',
+            required: true,
+            minLength: 1,
+            message: 'Position is required'
+          },
+          salary: {
+            type: 'number',
+            required: true,
+            min: 0,
+            message: 'Valid Salary is required (must be greater than 0)'
+          },
+          email: {
+            type: 'email',
+            required: true,
+            pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            message: 'Valid Email is required'
+          }
+        };
+        
+        static PROJECT_INFO = {
+          projectName: {
+            type: 'string',
+            required: true,
+            minLength: 3,
+            message: 'Project Name is required (minimum 3 characters)'
+          },
+          startDate: {
+            type: 'date',
+            required: true,
+            message: 'Contract Start Date is required'
+          },
+          endDate: {
+            type: 'date',
+            required: true,
+            message: 'Contract End Date is required'
+          },
+          trainingStartDate: {
+            type: 'date',
+            required: false,
+            allowEmpty: true
+          },
+          trainingEndDate: {
+            type: 'date',
+            required: false,
+            allowEmpty: true
+          }
+        };
+      }
+      
+      class SchemaValidator {
+        static validate(data, schema) {
+          const errors = [];
+          
+          for (const [field, rules] of Object.entries(schema)) {
+            const value = data[field];
+            const fieldErrors = this.validateField(value, field, rules);
+            errors.push(...fieldErrors);
+          }
+          
+          return {
+            isValid: errors.length === 0,
+            errors: errors
+          };
+        }
+        
+        static validateField(value, fieldName, rules) {
+          const errors = [];
+          
+          if (!this.shouldValidateField(value, rules)) {
+            return errors;
+          }
+          
+          if (rules.required && this.isEmptyValue(value)) {
+            errors.push(rules.message || `${fieldName} is required`);
+            return errors;
+          }
+          
+          this.validateFieldType(value, fieldName, rules, errors);
+          this.validateFieldValue(value, fieldName, rules, errors);
+          
+          return errors;
+        }
+        
+        static shouldValidateField(value, rules) {
+          return !(!rules.required && this.isEmptyValue(value));
+        }
+        
+        static isEmptyValue(value) {
+          return value === undefined || value === null || value === '';
+        }
+        
+        static validateFieldType(value, fieldName, rules, errors) {
+          if (!rules.type) return;
+          
+          const typeError = this.validateType(value, fieldName, rules);
+          if (typeError) {
+            errors.push(typeError);
+          }
+        }
+        
+        static validateFieldValue(value, fieldName, rules, errors) {
+          if (rules.type === 'string' && typeof value === 'string') {
+            this.validateStringConstraints(value, fieldName, rules, errors);
+          } else if (rules.type === 'number') {
+            this.validateNumberConstraints(value, fieldName, rules, errors);
+          }
+          
+          this.validateEnumConstraint(value, fieldName, rules, errors);
+          this.validatePatternConstraint(value, fieldName, rules, errors);
+        }
+        
+        static validateStringConstraints(value, fieldName, rules, errors) {
+          if (rules.minLength && value.length < rules.minLength) {
+            errors.push(`${fieldName} must be at least ${rules.minLength} characters`);
+          }
+          if (rules.maxLength && value.length > rules.maxLength) {
+            errors.push(`${fieldName} must not exceed ${rules.maxLength} characters`);
+          }
+        }
+        
+        static validateNumberConstraints(value, fieldName, rules, errors) {
+          const numValue = Number.parseFloat(value);
+          if (rules.min !== undefined && numValue < rules.min) {
+            errors.push(`${fieldName} must be at least ${rules.min}`);
+          }
+          if (rules.max !== undefined && numValue > rules.max) {
+            errors.push(`${fieldName} must not exceed ${rules.max}`);
+          }
+        }
+        
+        static validateEnumConstraint(value, fieldName, rules, errors) {
+          if (rules.enum && !rules.enum.includes(value)) {
+            errors.push(`${fieldName} must be one of: ${rules.enum.join(', ')}`);
+          }
+        }
+        
+        static validatePatternConstraint(value, fieldName, rules, errors) {
+          if (rules.pattern && typeof value === 'string' && !rules.pattern.test(value)) {
+            errors.push(rules.message || `${fieldName} format is invalid`);
+          }
+        }
+        
+        static validateType(value, fieldName, rules) {
+          switch (rules.type) {
+            case 'string':
+              if (typeof value !== 'string') {
+                return `${fieldName} must be a string`;
+              }
+              break;
+            case 'number':
+              if (Number.isNaN(Number.parseFloat(value)) || !Number.isFinite(Number.parseFloat(value))) {
+                return `${fieldName} must be a valid number`;
+              }
+              break;
+            case 'email':
+              if (typeof value !== 'string' || !rules.pattern.test(value)) {
+                return rules.message || `${fieldName} must be a valid email address`;
+              }
+              break;
+            case 'date':
+              if (!(value instanceof Date) && !this.isValidDateString(value)) {
+                return `${fieldName} must be a valid date`;
+              }
+              break;
+          }
+          return null;
+        }
+        
+        static isValidDateString(value) {
+          if (typeof value !== 'string') return false;
+          const date = new Date(value);
+          return date instanceof Date && !Number.isNaN(date);
+        }
+        
+        static validateRow(row, index) {
+          const data = this.extractRowData(row);
+          const validation = this.validate(data, ValidationSchema.PERSONNEL_RECORD);
+          
+          // Special validation: At least first name OR last name required
+          const hasFirstName = data.firstName && data.firstName.trim().length > 0;
+          const hasLastName = data.lastName && data.lastName.trim().length > 0;
+          
+          if (!hasFirstName && !hasLastName) {
+            validation.errors.push('First Name or Last Name is required');
+            validation.isValid = false;
+          }
+          
+          // Return errors without row prefix - let the form manager handle row context
+          return {
+            isValid: validation.isValid,
+            errors: validation.errors,
+            rowNumber: index + 1,
+            data: data
+          };
+        }
+        
+        static extractRowData(row) {
+          const val = (name) => row.querySelector(`[name="${name}"]`)?.value?.trim() || '';
+
+          return {
+            firstName:  val('firstname'),
+            lastName:   val('lastname'),
+            middleName: val('middlename'),
+            suffix:     val('suffix'),
+            gender:     val('gender'),
+            position:   val('position'),
+            salary:     val('salary'),
+            email:      val('email')
+          };
+        }
+        
+        static validateProjectInfo(formData) {
+          const data = {
+            projectName: formData.projName,
+            startDate: formData.startDate,
+            endDate: formData.endDate,
+            trainingStartDate: formData.trainingStartDate,
+            trainingEndDate: formData.trainingEndDate
+          };
+          
+          const validation = this.validate(data, ValidationSchema.PROJECT_INFO);
+          
+          // Additional date range validations
+          if (data.startDate && data.endDate) {
+            const start = new Date(data.startDate);
+            const end = new Date(data.endDate);
+            
+            if (start > end) {
+              validation.errors.push('Contract start date cannot be after end date');
+              validation.isValid = false;
+            }
+          }
+          
+          if (data.trainingStartDate && data.trainingEndDate) {
+            const trainingStart = new Date(data.trainingStartDate);
+            const trainingEnd = new Date(data.trainingEndDate);
+            
+            if (trainingStart > trainingEnd) {
+              validation.errors.push('Training start date cannot be after end date');
+              validation.isValid = false;
+            }
+          }
+          
+          return validation;
+        }
+      }
+      
+      // ===== PERFORMANCE MONITORING DASHBOARD =====
+      
+      class PerformanceDashboard {
+        static showMetrics() {
+          if (!globalThis.performanceMetrics) {
+            return;
+          }
+          
+          
+          const metrics = globalThis.performanceMetrics;
+          const categories = {};
+          
+          // Group metrics by category
+          Object.keys(metrics).forEach(key => {
+            let category;
+            if (key.includes('_failed')) {
+              category = 'Failed Operations';
+            } else if (key.includes('api_')) {
+              category = 'API Calls';
+            } else if (key.includes('filter')) {
+              category = 'Filtering';
+            } else {
+              category = 'Other';
+            }
+            
+            if (!categories[category]) categories[category] = [];
+            categories[category].push({ name: key, values: metrics[key] });
+          });
+          
+          // Performance recommendations
+          this.showRecommendations(metrics);
+        }
+        
+        static showRecommendations(metrics) {
+          const apiCalls = Object.entries(metrics).filter(([key]) => key.startsWith('api_'));
+          const avgApiTime = apiCalls.reduce((sum, [key, values]) => {
+            return sum + values.reduce((a, b) => a + b, 0) / values.length;
+          }, 0) / apiCalls.length;
+          
+          if (avgApiTime > 2000) {
+            console.warn('⚠️ High API response time detected:', avgApiTime.toFixed(2) + 'ms');
+          }
+          
+          const filterOps = metrics['filterTable'];
+          if (filterOps && filterOps.some(t => t > 500)) {
+            console.warn('⚠️ Slow filter operations detected');
+          }
+          
+          const failedOps = Object.keys(metrics).filter(key => key.includes('_failed'));
+          if (failedOps.length > 0) {
+            console.warn('⚠️ Failed operations detected:', failedOps);
+          }
+          
+          if (avgApiTime < 500 && failedOps.length === 0) {
+            console.log('✅ Performance is optimal');
+          }
+        }
+        
+        static clearMetrics() {
+          globalThis.performanceMetrics = {};
+        }
+      }
+      
+      // Make performance dashboard available globally
+      globalThis.PerformanceDashboard = PerformanceDashboard;
+      
+      // Add console command help
+
+function countUniqueCurrentYearColumn10() {
+        const currentYear = new Date().getFullYear().toString();
+        const uniqueValues = new Set();
+        const filteredRecordsForCount = StateManager.getState('records.filtered');
+        
+        if (!filteredRecordsForCount || filteredRecordsForCount.length === 0) {
+          return 0;
+        }
+        
+        filteredRecordsForCount.forEach(row => {
+          // Check if column 1 (index 0) contains current year
+          if (row[0] && row[0].includes(currentYear)) {
+            // Add column 10 (index 9) value to set
+            if (row[9]) {
+              uniqueValues.add(row[9]);
+            }
+          }
+        });
+        
+        return uniqueValues.size;
+      }
+
+      function clearTableSearch() {
+        const searchInput = document.getElementById('tableSearch');
+        searchInput.value = '';
+        filterTable();
+      }
+      
+      // Debounced search implementation
+      const debouncedFilterTable = debounce(() => {
+        applyTableFilters();
+      }, 300);
+
+      function filterTable() {
+        // Apply advanced filters after text search with debouncing
+        debouncedFilterTable();
+      }
+
+
+      function handleEscapeKey() {
+        closeModal('formModal');
+        closeModal('tableModal');
+        
+        const customAlert = document.getElementById('custom-alert');
+        if (customAlert && !customAlert.classList.contains('hidden')) {
+          document.getElementById('alert-close').click();
+        }
+      }
+      
+      function handleEnterKey(event) {
+        const formModal = document.getElementById('formModal');
+        if (!formModal.classList.contains('hidden')) {
+          const activeElement = document.activeElement;
+          if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'SELECT')) {
+            event.preventDefault();
+            document.getElementById('submitBtn').click();
+          }
+        }
+      }
+      
+      function handleArrowKeys(event) {
+        const tableModal = document.getElementById('tableModal');
+        if (!tableModal.classList.contains('hidden')) {
+          const prevBtn = document.getElementById('prevBtn');
+          const nextBtn = document.getElementById('nextBtn');
+          
+          if (event.key === 'ArrowLeft' && !prevBtn.disabled) {
+            event.preventDefault();
+            changePage(-1);
+          } else if (event.key === 'ArrowRight' && !nextBtn.disabled) {
+            event.preventDefault();
+            changePage(1);
+          }
+        }
+      }
+      
+      // Add keyboard listeners
+      globalThis.addEventListener('keydown', function(event) {
+        switch (event.key) {
+          case 'Escape':
+            handleEscapeKey();
+            break;
+          case 'Enter':
+            handleEnterKey(event);
+            break;
+          case 'ArrowLeft':
+          case 'ArrowRight':
+            handleArrowKeys(event);
+            break;
+        }
+      });
+
+      function showAlert(message, title = "Alert") {
+        const modal = document.getElementById('custom-alert');
+        const msgElem = document.getElementById('alert-message');
+        const titleElem = document.getElementById('alert-title');
+        const closeBtn = document.getElementById('alert-close');
+
+        // Set content (support both text and HTML)
+        if (message.includes('<')) {
+          setSafeHTML(msgElem, message);
+        } else {
+          msgElem.textContent = message;
+        }
+        titleElem.textContent = title;
+
+        // Show the modal
+        modal.classList.remove('hidden');
+
+        return new Promise((resolve) => {
+          closeBtn.onclick = () => {
+            modal.classList.add('hidden');
+            resolve(true); // Returns true when clicked
+          };
+        });
+      }
+
+function clearForm() {
+        // Reset editing state
+        editingRecordId = null;
+        
+        // Show bulk entry controls again
+        document.getElementById('bulkEntryControls').classList.remove('hidden');
+        
+        // Clear project information fields
+        document.querySelector('[name="projName"]').value = '';
+        document.querySelector('[name="startDate"]').value = '';
+        document.querySelector('[name="endDate"]').value = '';
+        document.querySelector('[name="trainingStartDate"]').value = '';
+        document.querySelector('[name="trainingEndDate"]').value = '';
+        
+        // Clear all entry rows
+        document.getElementById('entryRowsTest').innerHTML = '';
+        
+        // Add one fresh empty row
+        addNewEntryRows();
+        
+        // Reset row count to 1
+        document.getElementById('rowCount').value = 1;
+        
+        // Reset submit button text
+        document.getElementById('submitBtn').innerText = 'Save All Records';
+      }
+
+      async function handleAction(msg, title) {
+
+        // The code will wait here until "OK" is clicked
+        await showAlert(msg, title);
+
+      }
+    </script>
+
+    <script>
+// --- START OF SORTING SCRIPT ---
+document.addEventListener('DOMContentLoaded', () => {
+  const table = document.querySelector('#dataTable'); // IMPORTANT: Table in tableModal has ID 'dataTable'
+  if (!table) {
+    console.warn("Sortable: Table with ID 'dataTable' not found.");
+    return;
+  }
+
+  const headers = Array.from(table.querySelectorAll('th[data-sort-key]'));
+  const tbody = table.querySelector('tbody');
+  if (!tbody) {
+    console.warn("Sortable: Table body (tbody) not found.");
+    return;
+  }
+  
+  let currentKey = null;
+  let currentDir = 'asc';
+
+  // Helper function to get column mapping for sorting
+  const getColumnValue = (record, key) => {
+    const columnMap = {
+      'rowId': () => record[16] || '',
+      'refNumber': () => record[13] || '',
+      'name': () => record[3] ? record[3].toLowerCase() : '',
+      'project': () => record[10] ? record[10].toLowerCase() : '',
+      'gender': () => record[6] ? record[6].toLowerCase() : '',
+      'position': () => record[7] ? record[7].toLowerCase() : '',
+      'salary': () => Number.parseFloat(record[8] || 0),
+      'email': () => record[9] ? record[9].toLowerCase() : '',
+      'trainingDates': () => (record[14] || '') + (record[15] || ''),
+      'duration': () => (record[11] || '') + (record[12] || '')
+    };
+    
+    const getter = columnMap[key];
+    return getter ? getter() : null;
+  };
+
+  // Helper function to compare values for sorting
+  const compareValues = (va, vb, dirMul) => {
+    if (typeof va === 'number' && typeof vb === 'number') {
+      if (va < vb) return -1 * dirMul;
+      if (va > vb) return 1 * dirMul;
+      return 0;
+    }
+
+    const strA = typeof va === 'string' ? va : String(va).toLowerCase();
+    const strB = typeof vb === 'string' ? vb : String(vb).toLowerCase();
+    
+    if (strA < strB) return -1 * dirMul;
+    if (strA > strB) return 1 * dirMul;
+    return 0;
+  };
+
+  const sortRows = (key, dir) => {
+    const dirMul = dir === 'asc' ? 1 : -1;
+    
+    // Determine column index for the key based on data-sort-key matching header order
+    const th = headers.find(h => h.dataset.sortKey === key);
+    const idx = th ? Array.from(th.parentElement.children).indexOf(th) : -1;
+    if (idx < 0) return;
+
+    // Use the state manager filtered array and re-sort it
+    const filteredRecordsForSort = StateManager.getState('records.filtered');
+    const sorted = filteredRecordsForSort.slice().sort((rA, rB) => {
+      const va = getColumnValue(rA, key);
+      const vb = getColumnValue(rB, key);
+      
+      if (va === null || vb === null) return 0;
+      return compareValues(va, vb, dirMul);
+    });
+    
+    // Update the state with sorted data
+    StateManager.updateState('records.filtered', sorted); 
+
+    // Re-render the table using the existing function, which respects pagination
+    renderTable(); 
+  };
+
+  headers.forEach(th => {
+    th.style.cursor = 'pointer';
+    th.setAttribute('role', 'button');
+    th.setAttribute('tabindex', '0');
+    th.setAttribute('aria-label', `Sort by ${th.textContent.trim()}`);
+    
+    const handleSort = () => {
+      const key = th.dataset.sortKey;
+      if (currentKey === key) {
+        currentDir = currentDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentKey = key;
+        currentDir = 'asc';
+      }
+      sortRows(currentKey, currentDir);
+
+      // Update indicator
+      headers.forEach(h => {
+        h.textContent = h.textContent.replace(/ [^\s]*$/, '');
+        h.removeAttribute('aria-sort');
+      });
+      th.textContent += currentDir === 'asc' ? ' \u25b2' : ' \u25bc';
+      th.setAttribute('aria-sort', currentDir === 'asc' ? 'ascending' : 'descending');
+    };
+    
+    th.addEventListener('click', handleSort);
+    th.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleSort();
+      }
+    });
+  });
+});
+// --- END OF SORTING SCRIPT ---
+</script>
+
+          <div id="custom-alert" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" role="alertdialog" aria-modal="true" aria-labelledby="alert-title">
+        <button class="absolute inset-0 modal-overlay" onclick="document.getElementById('alert-close').click()" aria-label="Close alert"></button>
+        <div class="glass-effect rounded-3xl shadow-2xl max-w-md w-full p-8 transform transition-all card-hover z-10">
+            <div class="flex items-center mb-6">
+                <div class="bg-gradient-to-br from-yellow-400 to-orange-500 p-3 rounded-full mr-4 shadow-lg">
+                    <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent" id="alert-title">Alert</h3>
+            </div>
+            <p class="text-gray-600 mb-8 text-lg leading-relaxed" id="alert-message">This is a custom alert message.</p>
+            <div class="flex justify-end">
+                <button id="alert-close" class="btn-primary text-white px-8 py-3 rounded-xl font-medium flex items-center gap-2">
+                    <i class="fas fa-check"></i>
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
