@@ -397,9 +397,11 @@ function submitData(payload) {
     const sanitizedData = sanitizePayload(payload, schema);
     writeToSheet(sanitizedData);
     
+    logActivity('DATA_SUBMIT', `Submitted record for user: ${sanitizedData.user}`, 'success');
     return { success: true };
   } catch (e) {
     console.error(`Submission Error: ${e.message}`);
+    logActivity('DATA_SUBMIT', `Failed: ${e.message}`, 'error');
     return { success: false, error: e.message };
   }
 }
@@ -458,10 +460,12 @@ function updateRecord(rowIndex, updatedRow) {
     // 5. Execution
     sheet.getRange(sheetRow, 1, 1, 17).setValues([finalData]);
     
+    logActivity('RECORD_UPDATE', `Updated row at index: ${rowIndex}`, 'success');
     return { success: true };
 
   } catch (e) {
     console.error("Update Error: " + e.message);
+    logActivity('RECORD_UPDATE', `Failed to update row ${rowIndex}: ${e.message}`, 'error');
     return { success: false, error: e.message };
   }
 }
