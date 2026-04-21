@@ -863,8 +863,6 @@ const LogQueue = {
     
     console.log(`[SERVER] Flushing ${this.entries.length} log entries...`);
     
-    // No timer to clear anymore
-    
     this.isWriting = true;
     const entriesToWrite = [...this.entries];
     this.entries = [];
