@@ -293,7 +293,7 @@ function getProjectList() {
     
     const sortedProjects = Array.from(projectMap.entries())
       .sort((a, b) => b[1] - a[1])
-      .map(entry => entry[0].toUpperCase());
+      .map(entry => String(entry[0]).toUpperCase());
     
     
     return sortedProjects;
