@@ -910,6 +910,7 @@ function getOrCreateLogSheet() {
 function logActivity(action, details, status = 'success') {
   try {
     LogQueue.add(action, details, status);
+    console.log(`✓ Logged to "Log" sheet: [${action}] ${details} (${status})`);
   } catch (e) {
     console.error("Error logging activity: " + e.toString());
   }
