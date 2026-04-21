@@ -819,16 +819,25 @@ const LogQueue = {
   entries: [],
   isWriting: false,
   maxQueueSize: 10, // Reduced from 50 for more frequent flushes
-  flushTimer: null,
+  // Removed flushTimer as setTimeout is not available in Apps Script
   
   add: function(action, details, status = 'success') {
     try {
+      let userEmail = 'unknown';
+      try {
+        userEmail = Session.getEffectiveUser().getEmail();
+      } catch (e) {
+        // If we don't have permission to get user email, use a fallback
+        console.log(\"Using fallback user identifier: \" + e.toString());
+        userEmail = 'system';
+      }
+      
       this.entries.push({
         timestamp: new Date(),
         action: String(action).substring(0, 100),
         details: String(details).substring(0, 500),
         status: String(status).substring(0, 20),
-        user: Session.getEffectiveUser().getEmail()
+        user: userEmail
       });
       
       // Flush if queue reaches threshold
@@ -844,12 +853,9 @@ const LogQueue = {
   },
   
   scheduleFlush: function() {
-    if (this.flushTimer) return; // Already scheduled
-    
-    this.flushTimer = setTimeout(() => {
-      this.flushTimer = null;
-      this.flush();
-    }, 5000); // Flush after 5 seconds of inactivity
+    // setTimeout not available in Apps Script - removed auto-flush timer
+    // Flush will happen when queue reaches maxQueueSize or via explicit flushActivityLogs() call
+    return;
   },
   
   flush: function() {
@@ -857,11 +863,7 @@ const LogQueue = {
     
     console.log(`[SERVER] Flushing ${this.entries.length} log entries...`);
     
-    // Cancel scheduled flush if active
-    if (this.flushTimer) {
-      clearTimeout(this.flushTimer);
-      this.flushTimer = null;
-    }
+    // No timer to clear anymore
     
     this.isWriting = true;
     const entriesToWrite = [...this.entries];
