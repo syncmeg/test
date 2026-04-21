@@ -855,6 +855,8 @@ const LogQueue = {
   flush: function() {
     if (this.entries.length === 0 || this.isWriting) return;
     
+    console.log(`[SERVER] Flushing ${this.entries.length} log entries...`);
+    
     // Cancel scheduled flush if active
     if (this.flushTimer) {
       clearTimeout(this.flushTimer);
@@ -867,6 +869,8 @@ const LogQueue = {
     
     try {
       const logSheet = getOrCreateLogSheet();
+      console.log(`[SERVER] Got log sheet: ${logSheet.getName()}, lastRow: ${logSheet.getLastRow()}`);
+      
       const rows = entriesToWrite.map(entry => [
         entry.timestamp,
         entry.action,
@@ -878,9 +882,10 @@ const LogQueue = {
       if (rows.length > 0) {
         const startRow = logSheet.getLastRow() + 1;
         logSheet.getRange(startRow, 1, rows.length, 5).setValues(rows);
+        console.log(`[SERVER] Successfully wrote ${rows.length} rows to Log sheet starting at row ${startRow}`);
       }
     } catch (e) {
-      console.error("Error flushing log queue: " + e.toString());
+      console.error(`[SERVER ERROR] Error flushing log queue: ${e.toString()}`);
       // Re-add entries if write failed
       this.entries = [...entriesToWrite, ...this.entries];
     } finally {
