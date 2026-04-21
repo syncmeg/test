@@ -2445,7 +2445,7 @@
           <td class="px-4 py-2 text-sm">
               <div class="font-medium text-gray-900" data-field="name" data-row="${originalRowIndex}">${escapeHtml((record[3] || '').toUpperCase())}${record[4] ? ' ' + escapeHtml((record[4][0] || '').toUpperCase()) + '.' : ''} ${escapeHtml((record[2] || '').toUpperCase())}${record[5] ? ' ' + escapeHtml((record[5] || '').toUpperCase()) : ''}</div>
           </td>
-          <td class="px-4 py-2 text-sm font-bold text-gray-700" data-field="project" data-row="${originalRowIndex}">${escapeHtml((record[10] || '-').toUpperCase())}</td>
+          <td class="px-4 py-2 text-sm font-bold text-gray-700" data-field="project" data-row="${originalRowIndex}">${escapeHtml(String(record[10] || '-').toUpperCase())}</td>
           <td class="px-4 py-2 text-sm text-gray-600" data-field="gender" data-row="${originalRowIndex}">${escapeHtml(record[6])}</td>
           <td class="px-4 py-2 text-sm" data-field="position" data-row="${originalRowIndex}"><span class="bg-gray-100 px-2 py-1 rounded text-xs font-bold text-gray-600">${escapeHtml(record[7])}</span></td>
           <td class="px-4 py-2 text-sm font-mono text-green-600" data-field="salary" data-row="${originalRowIndex}">₱${Number(record[8] || 0).toLocaleString()}</td>
@@ -2702,7 +2702,7 @@ function renderTable() {
               <td class="px-4 py-2 text-sm">
                   <div class="font-medium text-gray-900" data-field="name" data-row="${row[0] - 1}">${escapeHtml((row[3] || '').toUpperCase())}${row[4] ? ' ' + escapeHtml((row[4][0] || '').toUpperCase()) + '.' : ''} ${escapeHtml((row[2] || '').toUpperCase())}${row[5] ? ' ' + escapeHtml((row[5] || '').toUpperCase()) : ''}</div>
               </td>
-              <td class="px-4 py-2 text-sm font-bold text-gray-700" data-field="project" data-row="${row[0] - 1}">${escapeHtml((row[10] || '-').toUpperCase())}</td>
+              <td class="px-4 py-2 text-sm font-bold text-gray-700" data-field="project" data-row="${row[0] - 1}">${escapeHtml(String(row[10] || '-').toUpperCase())}</td>
               <td class="px-4 py-2 text-sm text-gray-600" data-field="gender" data-row="${row[0] - 1}">${escapeHtml(row[6])}</td>
               <td class="px-4 py-2 text-sm" data-field="position" data-row="${row[0] - 1}"><span class="bg-gray-100 px-2 py-1 rounded text-xs font-bold text-gray-600">${escapeHtml(row[7])}</span></td>
               <td class="px-4 py-2 text-sm font-mono text-green-600" data-field="salary" data-row="${row[0] - 1}">₱${Number(row[8] || 0).toLocaleString()}</td>
