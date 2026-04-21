@@ -2154,7 +2154,7 @@
           projectCell.innerHTML = ''; // Clear first
           const projectInput = document.createElement('input');
           projectInput.type = 'text';
-          projectInput.value = (record[10] || '').toUpperCase();
+          projectInput.value = String(record[10] || '').toUpperCase();
           projectInput.className = 'w-full p-1 text-sm border rounded';
           projectInput.dataset.subfield = 'project';
           projectCell.appendChild(projectInput);
